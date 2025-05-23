@@ -9,6 +9,7 @@ import { ThemedView } from '@/components/ThemedView';
 
 const { width, height } = Dimensions.get('window');
 
+
 const App = () => {
   return (
     <View style={styles.container}>
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
 
 export default App;
 
-{/* <ParallaxScrollView
+/* <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <Image
@@ -128,4 +129,43 @@ export default App;
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
       </ThemedView>
-    </ParallaxScrollView> */}
+    </ParallaxScrollView> */
+
+    // import { MongoClient } from "mongodb";
+
+// // Replace the uri string with your MongoDB deployment's connection string.
+// const uri = "mongodb+srv://mannysally000:AnotherDayAnotherSlay@bob0.ezj6avw.mongodb.net/?retryWrites=true&w=majority&appName=Bob0";
+
+
+// // Create a new client and connect to MongoDB
+// const client = new MongoClient(uri);
+
+// async function run() {
+//   try {
+//     // Connect to the "sample_mflix" database and access its "movies" collection
+//     const database = client.db("sample_mflix");
+//     const movies = database.collection("movies");
+    
+//     // Create a document to insert
+//     const doc = {
+//       title: "Charade",
+//       genres: ["Comedy", "Romance", "Thriller"],
+//       year: 1963,
+//       cast: ["Cary Grant", "Audrey Hepburn", "Walter Matthau"],
+//     }
+//     // Insert the defined document into the "movies" collection
+//     const result = await movies.insertOne(doc);
+
+//     // Print the ID of the inserted document
+//     console.log(`A document was inserted with the _id: ${result.insertedId}`);
+//   } finally {
+//      // Close the MongoDB client connection
+//     await client.close();
+//   }
+// }
+// // Run the function and handle any errors
+// run().catch(console.dir);
+
+
+
+

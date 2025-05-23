@@ -2,6 +2,8 @@ import React from 'react';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { View, TouchableOpacity, ImageBackground, Text, SafeAreaView, StatusBar, Dimensions, Platform, StyleSheet } from 'react-native';
+import { Link } from 'expo-router';
+
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -9,7 +11,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Tabs, useNavigation } from 'expo-router';
 
-const { width, height } = Dimensions.get('window');
+const { widtcd ah, height } = Dimensions.get('window');
 const Home = () => {
   const router = useRouter();
   const navigateToTasks = () => {
@@ -43,6 +45,9 @@ const Home = () => {
             style={styles.startbutton}
           />
           </TouchableOpacity>
+
+
+          <Link href="../register"> Register Page </Link>
         
         </SafeAreaView>
 
