@@ -3,11 +3,23 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Dashboard from './pages/Home/Home'
 import Login from './pages/Login/Login'
 import Signup from './pages/Signup/Signup'
+import Profile from './pages/Profile/Profile'
+import Avatar from './pages/Profile/avatar'
+import EditProfile from './pages/Profile/EditProfile'
+import Journal from './pages/Journal/Journal'
+import Friends from './pages/Friends/Friends'
+import Study from './pages/Study/Study'
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/journal" element={<Journal />} />
+        <Route path="/friends" element={<Friends />} />
+        <Route path="/study" element={<Study />} />
+        <Route path="/profile/avatar" element={<Avatar />} />
+        <Route path="/profile/editprofile" element={<EditProfile />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

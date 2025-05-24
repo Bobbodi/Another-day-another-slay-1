@@ -19,6 +19,7 @@ import { ImFileEmpty } from "react-icons/im";
 
 const Home = () => {
 
+    
     const [openAddEditModal, setOpenAddEditModal] = React.useState({
         isShown: false, 
         type: "add",
@@ -37,6 +38,7 @@ const Home = () => {
     const [error, setError] = useState(null);
 
     const [isSearch, setIsSearch] = useState(false);
+    const [hoveredNoteId, setHoveredNoteId] = useState(null);
 
     const navigate = useNavigate(); 
 
@@ -87,17 +89,17 @@ const Home = () => {
         }
     }
 
-    const ifempty = () => { 
-        if (allNotes.length === 0) {
-            return (
-                <div className="col-span-3 flex flex-col items-center justify-center mt-10">
-                    <ImFileEmpty className="text-5xl text-[#ef476f] mb-2" />
-                    <span className="text-[#ef476f] text-lg">No notes</span>
-                </div>
-            );
-        }
-        return null;
-    }
+    // const ifempty = () => { 
+    //     if (allNotes.length === 0) {
+    //         return (
+    //             <div className="col-span-3 flex flex-col items-center justify-center mt-10">
+    //                 <ImFileEmpty className="text-5xl text-red mb-2" />
+    //                 <span className="text-red text-lg">No notes</span>
+    //             </div>
+    //         );
+    //     }
+    //     return null;
+    // }
 
 
     //delete Notes
@@ -182,7 +184,7 @@ const Home = () => {
 
         <div className="container mx-auto"> 
                 {allNotes.length > 0 ? 
-                    (<div className="grid grid-cols-3 gap-4 m-4">
+                    (<div className="grid grid-cols-3 gap-5 m-5">
                         {allNotes.map((item) => (
                         <NoteCard 
                             key={item._id}
@@ -196,6 +198,9 @@ const Home = () => {
                             onEdit={() => handleEdit(item)}
                             onDelete={() => deleteNote(item)}
                             onPinNote={() => updateIsPinned(item)}
+                            hovered={hoveredNoteId===item._id}
+                            onMouseEnter={() => setHoveredNoteId(item._id)}
+                            onMouseLeave={() => setHoveredNoteId(null)}
                         />
                     ))} 
                     </div>)
@@ -211,7 +216,7 @@ const Home = () => {
         </div>
 
         <button
-            className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-[#ffd166] hover:bg-[#ef476f] hover:shadow-2xl transition-shadow z-50"
+            className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow hover:bg-red hover:shadow-2xl transition-shadow z-50"
             onClick={() => {
                 setOpenAddEditModal({
                     isShown: true,
@@ -219,7 +224,7 @@ const Home = () => {
                     data: null,
                 });
             }}>
-            <MdAdd className="text-2xl text-[#06d6a0]" />
+            <MdAdd className="text-2xl text-green" />
         </button>
 
         <Modal 
@@ -256,3 +261,6 @@ const Home = () => {
 } 
 
 export default Home
+
+
+//grid grid-cols-3 gap-5 m-5

@@ -60,8 +60,8 @@ const Signup = () => {
         <>
         <Navbarv2 />
 
-        <div className = "backgrocund-[#06d6a0] flex items-center justify-center h-screen bg-gray-100" 
-            style = {{background: "#06d6a0"}}> 
+        <div className = "backgrocund-green flex items-center justify-center h-screen bg-gray-100" 
+            style = {{background: "var(--color-darkgreen)"}}> 
             <div className = "bg-white p-8 rounded shadow-md w-96"> 
                 <form onSubmit = {handleSignUp}> 
                     <h4 className = "text-2xl mb-7"> SignUp </h4>
@@ -86,13 +86,13 @@ const Signup = () => {
                     <PasswordInput value = {password} 
                     onChange={(e) => setPassword(e.target.value)}
                     />
-                    {error && <p className = "text-[#ef476f] text-sm mb-3"> {error} </p>}
+                    {error && <p className = "text-red text-sm mb-3"> {error} </p>}
 
                     <button type = "submit" className = "btn-primary"> Create Account </button>
 
                     <p className = "text-sm text-center mt-4"> 
                         Already have an account? {" "} 
-                        <Link to = "/login" className = "font-medium text-[#ef476f] underline"> 
+                        <Link to = "/login" className = "font-medium text-red underline"> 
                             Login </Link> 
                     </p>
 

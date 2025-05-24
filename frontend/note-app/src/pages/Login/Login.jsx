@@ -59,8 +59,8 @@ const Login = () => {
     return <>
         <Navbarv2 />
 
-        <div className = "flex items-center justify-center h-screen bg-gray-100" 
-            style = {{background: "#06d6a0"}}> 
+        <div className = "flex items-center justify-center m-13  bg-gray-100" 
+            style = {{background: "var(--color-darkgreen)"}}> 
             <div className = "bg-white p-8 rounded shadow-md w-96"> 
                 <form onSubmit = {handleLogin}> 
                     <h4 className = "text-2xl mb-7"> Login </h4>
@@ -77,13 +77,13 @@ const Login = () => {
                     <PasswordInput value = {password} 
                     onChange={(e) => setPassword(e.target.value)}
                     />
-                    {error && <p className = "text-[#ef476f] text-sm mb-3"> {error} </p>}
+                    {error && <p className = "text-red text-sm mb-3"> {error} </p>}
 
                     <button type = "submit" className = "btn-primary"> Login </button>
 
                     <p className = "text-sm text-center mt-4"> 
                         New here? {" "} 
-                        <Link to = "/signup" className = "font-medium text-[#ef476f] underline"> 
+                        <Link to = "/signup" className = "font-medium text-red underline"> 
                             Create an Account </Link> 
                     </p>
                 </form>

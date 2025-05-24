@@ -1,16 +1,28 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
   theme: {
     extend: {
       colors: {
-        red: '#ef476f',
-        yellow: '#ffd166',
-        green: '#06d6a0',
-        blue: '#118ab2', 
-        dark: '#073b4c'
+        // Your custom OKLCH colors
+        red: 'oklch(64.76% 0.204 11.07)',
+        yellow: 'oklch(88.03% 0.135 86.06)',
+        green: 'oklch(77.75% 0.160 166.57)',
+        blue: 'oklch(59.23% 0.112 227.97)',
+        dark: 'oklch(32.91% 0.059 225.83)',
+        
+        // Optional: Create semantic names
+        primary: 'oklch(59.23% 0.112 227.97)', // blue
+        secondary: 'oklch(77.75% 0.160 166.57)', // green
+        accent: 'oklch(64.76% 0.204 11.07)', // red
+        warning: 'oklch(88.03% 0.135 86.06)' // yellow
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'), // Optional plugin for better form styles
+    // Other plugins you might want
+  ],
 }

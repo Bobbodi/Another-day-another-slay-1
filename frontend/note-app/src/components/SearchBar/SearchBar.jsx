@@ -4,18 +4,18 @@ import { IoMdClose } from "react-icons/io";
 
 const SearchBar = ({value, onChange, handleSearch, onClearSearch, onKeyDown}) => {
   return (
-    <div className = "w-80 flex items-center px-4 bg-slate-100 rounded-full">
+    <div className = "w-80 flex items-center px-4 bg-white rounded-full">
         <input 
             type = "text" 
             placeholder = "Search Tasks" 
-            className = "w-full text-xs bg-transparent py-[11px] outline-none" 
+            className = "w-full text-s bg-transparent py-[11px] outline-none" 
             value = {value} 
             onChange = {onChange}
             onKeyDown={onKeyDown}
         />
 
-        {value && <IoMdClose className = "text-slate-400 cursor-pointer hover:text-black" onClick={onClearSearch} />}
-        <IoIosSearch className = "text-slate-400 cursor-pointer hover:text-black" onClick={handleSearch}
+        {value && <IoMdClose className = "text-xl text-slate-400 cursor-pointer hover:text-black" onClick={onClearSearch} />}
+        <IoIosSearch className = "text-xl text-slate-400 cursor-pointer hover:text-black" onClick={handleSearch}
         />
 
 

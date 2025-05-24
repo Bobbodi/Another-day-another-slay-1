@@ -95,14 +95,14 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
         className="p-2 rounded-full flex items-center justify-center absolute -top-3 -right-3"
         onClick={onClose}
       >
-        <MdClose className="text-xl text-slate-400 hover:text-[#ef476f]" />
+        <MdClose className="text-xl text-slate-400 hover:text-red" />
       </button>
 
       <div className="flex flex-col gap-2">
         <label className="input-label text-2xl">Title</label>
         <input
           type="text"
-          className="text-xl text-[#118ab2] outline-none p-2"
+          className="text-xl text-blue outline-none p-2"
           placeholder="Study BTT tmr"
           value={title}
           onChange={({ target }) => setTitle(target.value)}
@@ -116,7 +116,7 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
         <label className="input-label">Priority (0-5):</label>
         <input 
           type="number" 
-          className="text-l text-[#118ab2] outline-none bg-slate-50  rounded-xl p-2"
+          className="text-l text-blue outline-none bg-slate-50  rounded-xl p-2"
           placeholder='0' 
           min="0" 
           max="5"
@@ -129,7 +129,7 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
       <div className="flex flex-col gap-2 mt-4">
         <label className="input-label">Due Date (if any)</label>
           <input
-            className="text-l text-[#118ab2] outline-none bg-slate-50  rounded-xl p-2"
+            className="text-l text-blue outline-none bg-slate-50  rounded-xl p-2"
             placeholder='2025-05-22T22:26'
             type="datetime-local"
             id="meeting-time"
@@ -146,7 +146,7 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
         <label className="input-label">Details</label>
         <textarea
           type="text"
-          className="text-sm text-[#118ab2] outline-none bg-slate-50 p-2 rounded-xl"
+          className="text-sm text-blue outline-none bg-slate-50 p-2 rounded-xl"
           placeholder="Location at Bukit Batok"
           rows={2}
           value={content}
