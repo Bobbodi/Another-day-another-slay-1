@@ -6,14 +6,33 @@ import moment from "moment";
 import { useState } from 'react';
 
 const NoteCard = ({
-    title, date, content, priority, dueDate, tags, isPinned, onEdit, onDelete, onPinNote}) => { 
+    title, date, content, priority, dueDate, tags, isPinned, onEdit, onDelete, onPinNote, hovered, onMouseEnter, onMouseLeave}) => { 
 
     const [isPinHovered, setIsPinHovered] = useState(false);
+
+    const displayContent = () => {
+        return (
+            <>
+            {hovered && content.length == 0
+                ? <p className="text-s text-white"> . </p>  
+                : hovered 
+                ? <p className="text-s note-hover-text"> {content} </p>  
+                : content.length > 32 
+                    ? <p className="text-s note-hover-text">{content?.slice(0, 32)}...</p> 
+                    : content.length == 0
+                        ? <p className="text-s text-white">.</p>
+                        : <p className="text-s note-hover-text"> {content} </p>  
+            }
+            </>
+        )
+    }
 
 return (
     <div
         className="border rounded-2xl p-4 bg-white hover:shadow-2xl transition-all duration-200 ease-in-out group"
         style={{ borderColor: "#ffd166", borderWidth: "3px" }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
     >
         <style>
             {`
@@ -27,7 +46,7 @@ return (
         </style>
         <div className="flex items-center justify-between">
             <div>
-                <h6 className="text-sm font-medium note-hover-text">{title?.slice(0, 42)}</h6>
+                <h6 className="text-s font-medium note-hover-text">{hovered ? title : title.length > 24 ? `${title?.slice(0, 24)}...` : title}</h6>
                 <span className='text-xs text-slate-500'>{moment(date).format('Do MMM YYYY')}</span>
             </div>
 
@@ -39,15 +58,15 @@ return (
                 <MdOutlinePushPin
                     className={`icon-btn hover:icon-btn ${
                         (isPinned && !isPinHovered) || (!isPinned && isPinHovered)
-                            ? "text-[#06d6a0]"
+                            ? "text-green"
                             : "text-slate-300"
                     } m-3`} 
                     onClick={onPinNote}
                 />
             </div>
         </div>
-        <p className="text-xs note-hover-text">{content?.slice(0, 110)}</p>
-
+        <p className="text-s note-hover-text"> {displayContent()} </p> 
+        
         <div className="flex items-center justify-between mt-2">
             <h1 className='text-xs text-slate-500'>Priority: {priority}</h1>
             <h1 className='text-xs text-slate-500'>Due in: {moment(dueDate).format('Do MMM YYYY')}</h1>
@@ -60,9 +79,9 @@ return (
                 )}
             </div>
             <div className="flex items-center gap-2">
-                <MdCreate className="text-gray-300 cursor-pointer hover:text-[#06d6a0]"
+                <MdCreate className="text-gray-300 cursor-pointer hover:text-green"
                     onClick={onEdit} />
-                <MdDelete className="text-gray-300 cursor-pointer hover:text-[#ef476f]"
+                <MdDelete className="text-gray-300 cursor-pointer hover:text-red"
                     onClick={onDelete} />
             </div>
 
@@ -73,3 +92,5 @@ return (
 }
 
 export default NoteCard
+
+//<p className="text-s note-hover-text">{hovered ? content : content.length > 35 ? `${content?.slice(0, 35)}...` : content}</p>

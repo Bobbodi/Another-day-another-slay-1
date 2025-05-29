@@ -7,7 +7,8 @@ mongoose.connect(config.connectionString)
 
 const User = require("./models/user.model");
 const Note = require("./models/note.model");
-
+const Journal = require("./models/journal.model");
+const Friends = require("./models/friends.model");
 
 const express = require("express");
 const cors = require("cors");
@@ -24,7 +25,7 @@ app.use(
     })
 );
 
-//BACKEND READY!!!
+//TASKS/NOTES!!
 
 app.get("/", (req, res) => { 
     res.json({data: "hello"})
@@ -283,6 +284,145 @@ app.get("/search-notes/", authenticateToken, async (req, res) => {
 })
 
 
+//JOURNAL
+app.post("/add-journal", authenticateToken, async (req, res) => { 
+    console.log(req.body);
+    const { entry } = req.body; 
+    const { user } = req.user; 
+
+    if (!entry) {
+        return res.status(400).json({error: true, message: "Text is required"});
+    }
+
+    try { 
+        const journal = new Journal({
+            entry, 
+            userId: user._id,
+        });
+
+        await journal.save(); 
+
+        return res.json({
+            error: false,
+            journal, 
+            message: "Journal added successfully",
+        }) 
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
+
+app.get("/get-all-journal/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const journals = await Journal.find({ userId: user._id})
+        .sort({ createdOn: -1});
+
+        return res.json({ error: false, journals, message: "All journals retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+//FRIENDS
+app.post("/add-friends", authenticateToken, async (req, res) => { 
+    console.log(req.body);
+    const { person1, person2, status } = req.body;  
+
+    try { 
+        const friendship = new Friends({
+            person1,
+            person2, 
+            status
+        });
+
+        await friendship.save(); 
+
+        return res.json({
+            error: false,
+            friendship, 
+            message: "Friendship added successfully",
+        }) 
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
+
+app.get("/get-all-friends/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const friendships = await Friends.find({
+            $or: [
+                { person1: user._id },
+                { person2: user._id }
+            ]
+        }).sort({ status: 1 });
+
+        // 2. Get all unique friend IDs (excluding the current user)
+        const friendIds = friendships.map(f => 
+            f.person1.toString() === user._id.toString() ? f.person2 : f.person1
+        );
+
+        // 3. Get user details for these friends
+        const friends = await User.find(
+            { _id: { $in: friendIds } },
+            { fullName: 1 } // Only return name field
+        );
+
+        return res.json({ error: false, friends, message: "All friends' name retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+app.get("/search-people/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+    const { query } = req.query; 
+
+    if (!query) { 
+        return res.status(400).json({ error: true, message: "Search query is required"});
+    }
+
+    try { 
+        const matchingPeople = await User.find({ 
+            _id: { $ne: user._id }, 
+            $or: [
+                {fullName: {$regex: new RegExp(query, 'i')}},
+                {email: {$regex: new RegExp(query, "i")}},
+            ],
+        })
+
+        console.log("People: "+matchingPeople);
+
+        return res.json({ error: false, 
+            people: matchingPeople, 
+            message: "People found"
+        })
+        
+    } catch (error) {
+        return res.status(500).json({ error: true, message: "Internal Server Error"})
+    }
+})
+
+app.get("/get-all-people/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const people = await User.find({ userId: user._id})
+
+        return res.json({ error: false, people, message: "All people retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
 
 app.listen(8000);
 module.exports = app;

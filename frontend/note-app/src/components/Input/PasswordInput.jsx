@@ -11,7 +11,7 @@ const PasswordInput = ({ value, onChange, placeholder }) => {
     };
 
     return (
-        <div className = "flex items-center bg-transparent border-[1.5px] px-5 rounded mb-3 border-[#ef476f] focus-within:border-[#ffd166] transition-colors" > 
+        <div className = "flex items-center bg-transparent border-[1.5px] px-5 rounded mb-3 border-red focus-within:border-yellow transition-colors" > 
         
             <input 
             value = {value} 
@@ -22,11 +22,11 @@ const PasswordInput = ({ value, onChange, placeholder }) => {
         
             {isShowPassword ? <AiFillEye
                 onClick = {toggleShowPassword} 
-                className = "text-[#ef476f] cursor-pointer" 
+                className = "text-red cursor-pointer" 
                 size = {40} 
             /> : <AiFillEyeInvisible
                 onClick = {toggleShowPassword} 
-                className = "text-[#ffd166] cursor-pointer" 
+                className = "text-yellow cursor-pointer" 
                 size = {40}
             />}
 

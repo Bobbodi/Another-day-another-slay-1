@@ -38,12 +38,12 @@ return (
     <div>
 
             {tags?.length > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap mt-2 text-[#118ab2]">
+                    <div className="flex items-center gap-2 flex-wrap mt-2 text-blue">
                     {tags.map((tag, index) => (
-                            <span key = {index} className = "text-[#118ab2] flex items-center gap-2 mb-2 text-sm bg-slate-50 px-3 py-1 rounded-full"> 
+                            <span key = {index} className = "text-blue flex items-center gap-2 mb-2 text-sm bg-slate-50 px-3 py-1 rounded-full"> 
                             # {tag} 
                             <button onClick = {() => {handleRemoveTag(tag)}}>
-                                    <MdClose className="hover:text-[#ef476f]"/>
+                                    <MdClose className="hover:text-red"/>
                             </button>
                             </span>
                     ))}
@@ -59,7 +59,7 @@ return (
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}/>
 
-            <button className="p-1.5 flex items-center justify-center rounded-full bg-[#ef476f] hover:bg-[#06d6a0]"
+            <button className="p-1.5 flex items-center justify-center rounded-full bg-red hover:bg-green"
             onClick={() => {
                     addNewTag()
             }}>
@@ -72,4 +72,4 @@ return (
 
 export default TagInput
 
-//border border-[#ef476f] border-opacity-50
+//border border-red border-opacity-50
