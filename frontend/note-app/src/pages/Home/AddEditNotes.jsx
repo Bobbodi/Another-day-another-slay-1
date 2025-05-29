@@ -110,6 +110,19 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
         />
       </div>
 
+      <div className="flex flex-col gap-2 mt-4">
+        <label className="input-label">Details</label>
+        <textarea
+          type="text"
+          className="text-sm text-blue outline-none bg-slate-50 p-2 rounded-xl"
+          placeholder="Location at Bukit Batok"
+          rows={2}
+          value={content}
+          onChange={({ target }) => setContent(target.value)}
+          onKeyDown={onKeyDown}
+        />
+      </div>
+
     <div className="flex flex-row justify-between">
     
       <div className="flex flex-col gap-2 mt-4">
@@ -142,18 +155,7 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
       </div>
     </div> 
 
-      <div className="flex flex-col gap-2 mt-4">
-        <label className="input-label">Details</label>
-        <textarea
-          type="text"
-          className="text-sm text-blue outline-none bg-slate-50 p-2 rounded-xl"
-          placeholder="Location at Bukit Batok"
-          rows={2}
-          value={content}
-          onChange={({ target }) => setContent(target.value)}
-          onKeyDown={onKeyDown}
-        />
-      </div>
+      
 
       <div className="flex flex-col mt-3">
         <label className="input-label mb-2">Tags</label>

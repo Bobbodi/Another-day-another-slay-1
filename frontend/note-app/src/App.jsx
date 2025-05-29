@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Dashboard from './pages/Home/Home'
 import Login from './pages/Login/Login'
 import Signup from './pages/Signup/Signup'
@@ -10,10 +10,12 @@ import Journal from './pages/Journal/Journal'
 import Friends from './pages/Friends/Friends'
 import Study from './pages/Study/Study'
 
+
 const App = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} /> {/* Changed to Navigate to login */}
         <Route path="/journal" element={<Journal />} />
         <Route path="/friends" element={<Friends />} />
         <Route path="/study" element={<Study />} />

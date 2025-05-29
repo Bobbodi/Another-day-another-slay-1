@@ -6,7 +6,10 @@ import axiosInstance from '../../utils/axiosInstance';
 import imgsrc from '../../assets/images/customise-avatar.png';
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei"
+import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
+import { Model } from "../../../public/3_06AM"; 
+
+
 
 const Avatar = () => {
 
@@ -38,12 +41,24 @@ const Avatar = () => {
     <>
       <Navbarv3 userInfo={userInfo}/>
 
+      <Canvas camera={{ fov: 64, position: [5, 5, 20] }}>
+        
+        <ambientLight intensity={5} />
+        <OrbitControls enableZoom={true} />
+        <Model />
+        <Environment preset='sunset'/>
+        <ContactShadows opacity={0.5} scale={100} blur={1} far={10} resolution={256} color="#000000" />
+
+
+      </Canvas>
+
+      
       <Canvas camera={{
         position: [3, 3, 3]
       }}>
         <OrbitControls/>
         <mesh> 
-          <boxGeometry args={[0.5, 0.5, 0.5]} />
+          <boxGeometry args={[1, 1, 1]} />
           <meshNormalMaterial/>
         </mesh> 
       </Canvas>

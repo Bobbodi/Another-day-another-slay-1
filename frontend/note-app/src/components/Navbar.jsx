@@ -61,7 +61,7 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
     }
     
     return ( 
-        <div className = "bg-yellow flex items-center justify-between px-6 py-2 drop-shadow"> 
+        <div className = "bg-yellow flex items-center justify-between px-6 py-2 drop-shadow w-screen"> 
             <h2 className = "text-2xl font-medium text-black py-2"> SlayFocus </h2>
 
             <SearchBar value = {searchQuery}
@@ -69,7 +69,8 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
                 setSearchQuery(target.value)}}
             handleSearch={handleSearch}
             onClearSearch={onClearSearch}
-            onKeyDown={onKeyDown}/>
+            onKeyDown={onKeyDown}
+            text="Search Tasks"/>
 
             <div className="flex flex-row gap-3 items-center justify-center"> 
                 <ProfileInfo 
@@ -79,7 +80,11 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
                     onFriends={onFriends}
                     onJournal={onJournal}
                     onStudy={onStudy}
-                    onTasks={onTasks}/>
+                    onTasks={onTasks}
+                    isFriends={location.pathname === "/friends"}
+                    isJournal={location.pathname === "/journal"}
+                    isStudy={location.pathname === "/study"}
+                    isTasks={location.pathname === "/dashboard"}/>
             </div>
 
             

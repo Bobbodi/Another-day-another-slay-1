@@ -17,8 +17,8 @@ const NoteCard = ({
                 ? <p className="text-s text-white"> . </p>  
                 : hovered 
                 ? <p className="text-s note-hover-text"> {content} </p>  
-                : content.length > 35 
-                    ? <p className="text-s note-hover-text">{content?.slice(0, 35)}...</p> 
+                : content.length > 32 
+                    ? <p className="text-s note-hover-text">{content?.slice(0, 32)}...</p> 
                     : content.length == 0
                         ? <p className="text-s text-white">.</p>
                         : <p className="text-s note-hover-text"> {content} </p>  
@@ -46,7 +46,7 @@ return (
         </style>
         <div className="flex items-center justify-between">
             <div>
-                <h6 className="text-s font-medium note-hover-text">{hovered ? title : title.length > 27 ? `${title?.slice(0, 27)}...` : title}</h6>
+                <h6 className="text-s font-medium note-hover-text">{hovered ? title : title.length > 24 ? `${title?.slice(0, 24)}...` : title}</h6>
                 <span className='text-xs text-slate-500'>{moment(date).format('Do MMM YYYY')}</span>
             </div>
 
