@@ -10,6 +10,7 @@ import Toast from "../../components/ToastMessage/Toast";
 import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import AddNotesImg from "../../assets/images/cat.png"
 import NoData from "../../assets/images/bear.png"
+import Star from "../../assets/images/star.png"
 
 import Modal from "react-modal";
 
@@ -31,7 +32,6 @@ const Home = () => {
         type: "add",
         message: ""
     })
-
     
     const [allNotes, setAllNotes] = useState([]);
     const [userInfo, setUserInfo] = useState(null); 
@@ -89,18 +89,6 @@ const Home = () => {
         }
     }
 
-    // const ifempty = () => { 
-    //     if (allNotes.length === 0) {
-    //         return (
-    //             <div className="col-span-3 flex flex-col items-center justify-center mt-10">
-    //                 <ImFileEmpty className="text-5xl text-red mb-2" />
-    //                 <span className="text-red text-lg">No notes</span>
-    //             </div>
-    //         );
-    //     }
-    //     return null;
-    // }
-
 
     //delete Notes
     const deleteNote = async (data) => {
@@ -111,7 +99,7 @@ const Home = () => {
 
         if (response.data && response.data.error === false) { 
           console.log("here3")
-          showToastMessage("Note Deleted Succesfully", 'delete')
+          showToastMessage("Task Deleted Succesfully", 'delete')
           getAllNotes()
           onClose()
         } 
@@ -144,17 +132,17 @@ const Home = () => {
         }
     }
 
-    const updateIsPinned = async (nodeData) => { 
+    const updateIsDone = async (nodeData) => { 
         const noteId = nodeData._id;
         try { 
             console.log("here2")
-            const response = await axiosInstance.put("/update-note-pinned/" + noteId, { 
-                "isPinned": !nodeData.isPinned
+            const response = await axiosInstance.put("/update-note-done/" + noteId, { 
+                "isDone": !nodeData.isDone
             })
 
             if (response.data && response.data.note) { 
                 console.log("here3")
-                showToastMessage("Note Updated Succesfully")
+                showToastMessage("Task Updated Succesfully")
                 getAllNotes()
             
             } 
@@ -179,64 +167,167 @@ const Home = () => {
     }, [])
     
     return (
-        <>
-        <Navbar userInfo={userInfo} onSearchNote = {onSearchNote} handleClearSearch = {handleClearSearch}/>
+    <>
+        <Navbar userInfo={userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch} />
 
-        <div className="container mx-auto"> 
-                {allNotes.length > 0 ? 
-                    (<div className="grid grid-cols-3 gap-5 m-5">
-                        {allNotes.map((item) => (
-                        <NoteCard 
-                            key={item._id}
+        <div className="min-h-screen bg-gray-50">
+            <div className="container mx-auto px-4 py-8">
+
+                {/* Main Content Area */}
+
+                <div className="bg-yellow-100 rounded-xl shadow-lg p-6 mb-6">
+                {/* Today's suggested tasks section */}
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">Today's suggested to-do</h1>
+                
+                {/* Filter for incomplete tasks (isDone = false) */}
+                {allNotes.filter(note => !note.isDone).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allNotes
+                        .filter(note => !note.isDone)
+                        .slice(0, 3)
+                        .map((item) => (
+                        <div key={item._id} className="h-full">
+                            <NoteCard 
                             title={item.title}
                             date={item.createdOn}
                             content={item.content}
                             priority={item.priority}
                             deadline={item.dueDate}
                             tags={item.tags}
-                            isPinned={item.isPinned}
+                            isDone={item.isDone}
                             onEdit={() => handleEdit(item)}
                             onDelete={() => deleteNote(item)}
-                            onPinNote={() => updateIsPinned(item)}
+                            onDoneNote={() => updateIsDone(item)}
                             hovered={hoveredNoteId===item._id}
                             onMouseEnter={() => setHoveredNoteId(item._id)}
                             onMouseLeave={() => setHoveredNoteId(null)}
-                        />
-                    ))} 
-                    </div>)
-                : <EmptyCard 
-                imgSrc = {isSearch ? NoData : AddNotesImg} 
-                message = {isSearch 
-                    ? "Oops! No notes match your search"
-                    : "Click the '+' button at the bottom to keep track of your tasks and thoughts!"
-                }
-                />
-            }
-            
+                            />
+                        </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyCard 
+                    imgSrc={Star} 
+                    message="Fabulous! You've finished everything!"
+                    />
+                )}
+                </div>
+
+
+                
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                {/* Upcoming Tasks Section */}
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">Upcoming Tasks</h1>
+                
+                {/* Filter for incomplete tasks (isDone = false) */}
+                {allNotes.filter(note => !note.isDone).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allNotes
+                        .filter(note => !note.isDone)
+                        .map((item) => (
+                        <div key={item._id} className="h-full">
+                            <NoteCard 
+                            title={item.title}
+                            date={item.createdOn}
+                            content={item.content}
+                            priority={item.priority}
+                            deadline={item.dueDate}
+                            tags={item.tags}
+                            isDone={item.isDone}
+                            onEdit={() => handleEdit(item)}
+                            onDelete={() => deleteNote(item)}
+                            onDoneNote={() => updateIsDone(item)}
+                            hovered={hoveredNoteId===item._id}
+                            onMouseEnter={() => setHoveredNoteId(item._id)}
+                            onMouseLeave={() => setHoveredNoteId(null)}
+                            />
+                        </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyCard 
+                    imgSrc={AddNotesImg} 
+                    message="No upcoming tasks - add a new task or check your completed tasks below!"
+                    />
+                )}
+                </div> 
+
+                <div className="bg-gray-300 rounded-xl shadow-lg p-6 my-6">
+                {/* Completed Tasks Section */}
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">Completed Tasks</h1>
+                
+                {/* Filter for completed tasks (isDone = true) */}
+                {allNotes.filter(note => note.isDone).length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allNotes
+                        .filter(note => note.isDone)
+                        .map((item) => (
+                        <div key={item._id} className="h-full opacity-80">
+                            <NoteCard 
+                            title={item.title}
+                            date={item.createdOn}
+                            content={item.content}
+                            priority={item.priority}
+                            deadline={item.dueDate}
+                            tags={item.tags}
+                            isDone={item.isDone}
+                            onEdit={() => handleEdit(item)}
+                            onDelete={() => deleteNote(item)}
+                            onDoneNote={() => updateIsDone(item)}
+                            hovered={hoveredNoteId===item._id}
+                            onMouseEnter={() => setHoveredNoteId(item._id)}
+                            onMouseLeave={() => setHoveredNoteId(null)}
+                            />
+                        </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyCard 
+                    imgSrc={NoData} 
+                    message="No tasks completed yet - keep going!"
+                    />
+                )}
+                </div>
+            </div>
         </div>
 
+        {/* Floating Add Button */}
         <button
-            className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow hover:bg-red hover:shadow-2xl transition-shadow z-50"
+            className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow-500 hover:bg-red-500 text-white shadow-lg hover:shadow-xl transition-all z-50"
             onClick={() => {
                 setOpenAddEditModal({
                     isShown: true,
                     type: "add",
                     data: null,
                 });
-            }}>
-            <MdAdd className="text-2xl text-green" />
+            }}
+            aria-label="Add new note"
+        >
+            <MdAdd className="text-3xl" />
         </button>
 
+        {/* Modal */}
         <Modal 
             isOpen={openAddEditModal.isShown}
-            onRequestClose={() => {}}
+            onRequestClose={() => setOpenAddEditModal({ isShown: false, type: "add", data: null })}
             style={{
                 overlay: {
                     backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    zIndex: 1000
+                },
+                content: {
+                    maxHeight: "90vh",
+                    
+                    borderRadius: "0.5rem",
+                    padding: "0",
+                    border: "none",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                 }
             }}
-            contentLabel=""
-            className="w-[50%] max-h-6/7 bg-white rounded-md mx-auto mt-14 p-5 overflow-scroll"
+            contentLabel="Add/Edit Note"
+            className="w-[45%] max-w-3xl overflow-scroll"
+            overlayClassName="fixed inset-0 flex items-center justify-center p-4"
+            
         >
             <AddEditNotes 
                 type={openAddEditModal.type}
@@ -247,20 +338,151 @@ const Home = () => {
                 }}
                 showToastMessage={showToastMessage}
             />
+
         </Modal>
 
         <Toast
-            isShown = {showToastMsg.isShown}
-            message = {showToastMsg.message}
-            type = {showToastMsg.type}
-            onClose = {handleCloseToast}
+            isShown={showToastMsg.isShown}
+            message={showToastMsg.message}
+            type={showToastMsg.type}
+            onClose={handleCloseToast}
         />
-
-        </>  
-    )
+    </>
+)
 } 
 
 export default Home
 
 
 //grid grid-cols-3 gap-5 m-5
+
+
+// return (
+//         <>
+//         <Navbar userInfo={userInfo} onSearchNote = {onSearchNote} handleClearSearch = {handleClearSearch}/>
+
+//         <div className="container mx-auto"> 
+//                 {allNotes.length > 0 ? 
+//                     (<div className="grid grid-cols-3 gap-5 m-5">
+//                         {allNotes.map((item) => (
+//                         <NoteCard 
+//                             key={item._id}
+//                             title={item.title}
+//                             date={item.createdOn}
+//                             content={item.content}
+//                             priority={item.priority}
+//                             deadline={item.dueDate}
+//                             tags={item.tags}
+//                             isDone={item.isDone}
+//                             onEdit={() => handleEdit(item)}
+//                             onDelete={() => deleteNote(item)}
+//                             onDoneNote={() => updateIsDone(item)}
+//                             hovered={hoveredNoteId===item._id}
+//                             onMouseEnter={() => setHoveredNoteId(item._id)}
+//                             onMouseLeave={() => setHoveredNoteId(null)}
+//                         />
+//                     ))} 
+//                     </div>)
+//                 : <EmptyCard 
+//                 imgSrc = {isSearch ? NoData : AddNotesImg} 
+//                 message = {isSearch 
+//                     ? "Oops! No notes match your search"
+//                     : "Click the '+' button at the bottom to keep track of your tasks and thoughts!"
+//                 }
+//                 />
+//             }
+            
+//         </div>
+
+//         <button
+//             className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow hover:bg-red hover:shadow-2xl transition-shadow z-50"
+//             onClick={() => {
+//                 setOpenAddEditModal({
+//                     isShown: true,
+//                     type: "add",
+//                     data: null,
+//                 });
+//             }}>
+//             <MdAdd className="text-2xl text-green" />
+//         </button>
+
+//         <Modal 
+//             isOpen={openAddEditModal.isShown}
+//             onRequestClose={() => {}}
+//             style={{
+//                 overlay: {
+//                     backgroundColor: "rgba(0, 0, 0, 0.5)",
+//                 }
+//             }}
+//             contentLabel=""
+//             className="w-[50%] max-h-6/7 bg-white rounded-md mx-auto mt-14 p-5 overflow-scroll"
+//         >
+//             <AddEditNotes 
+//                 type={openAddEditModal.type}
+//                 nodeData={openAddEditModal.data}
+//                 getAllNotes={getAllNotes}
+//                 onClose={() => { 
+//                     setOpenAddEditModal({ isShown:false, type:"add", data:null});
+//                 }}
+//                 showToastMessage={showToastMessage}
+//             />
+//         </Modal>
+
+//         <Toast
+//             isShown = {showToastMsg.isShown}
+//             message = {showToastMsg.message}
+//             type = {showToastMsg.type}
+//             onClose = {handleCloseToast}
+//         />
+
+//         </>  
+//     )
+
+
+
+//adding the completedTasks area
+
+                // {/* Main Content Area */}
+                // <div className="bg-white rounded-xl shadow-lg p-6">
+                //     <h1 className="text-2xl font-bold text-gray-800 mb-6">Upcoming Tasks</h1>
+                    
+                //     {/* Notes Grid */}
+                //     {allNotes.length > 0 ? (
+                //         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                //             {allNotes.map((item) => ( 
+                //                 <div key={item._id}
+                //                     className="h-full" // Ensure consistent height
+                //                     >
+                //                 <NoteCard 
+                //                     key={item._id}
+                //                     title={item.title}
+                //                     date={item.createdOn}
+                //                     content={item.content}
+                //                     priority={item.priority}
+                //                     deadline={item.dueDate}
+                //                     tags={item.tags}
+                //                     isDone={item.isDone}
+                //                     onEdit={() => handleEdit(item)}
+                //                     onDelete={() => deleteNote(item)}
+                //                     onDoneNote={() => updateIsDone(item)}
+                //                     hovered={hoveredNoteId===item._id}
+                //                     onMouseEnter={() => setHoveredNoteId(item._id)}
+                //                     onMouseLeave={() => setHoveredNoteId(null)}
+                //                 />
+                //                 </div> 
+                //             ))}
+                //         </div>
+                //     ) : (
+                //         <EmptyCard 
+                //             imgSrc={isSearch ? NoData : AddNotesImg} 
+                //             message={isSearch 
+                //                 ? "Oops! No notes match your search"
+                //                 : "Click the '+' button below to create your first note!"
+                //             }
+                //         />
+                //     )}
+
+
+                //     <h1 className="text-2xl font-bold text-gray-800 my-6">Completed Tasks</h1>
+
+                // </div>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { LuCircleCheckBig } from "react-icons/lu";
 import { MdCreate, MdOutlinePushPin } from "react-icons/md";
 import { IoMdCreate } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
@@ -6,9 +7,9 @@ import moment from "moment";
 import { useState } from 'react';
 
 const NoteCard = ({
-    title, date, content, priority, dueDate, tags, isPinned, onEdit, onDelete, onPinNote, hovered, onMouseEnter, onMouseLeave}) => { 
+    title, date, content, priority, dueDate, tags, isDone, onEdit, onDelete, onDoneNote, hovered, onMouseEnter, onMouseLeave}) => { 
 
-    const [isPinHovered, setIsPinHovered] = useState(false);
+    const [isDoneHovered, setIsDoneHovered] = useState(false);
 
     const displayContent = () => {
         return (
@@ -16,9 +17,9 @@ const NoteCard = ({
             {hovered && content.length == 0
                 ? <p className="text-s text-white"> . </p>  
                 : hovered 
-                ? <p className="text-s note-hover-text"> {content} </p>  
-                : content.length > 32 
-                    ? <p className="text-s note-hover-text">{content?.slice(0, 32)}...</p> 
+                ? <p className="text-s note-hover-text whitespace-pre-wrap break-words"> {content} </p>  
+                : content.length > 20 
+                    ? <p className="text-s note-hover-text">{content?.slice(0, 20)}...</p> 
                     : content.length == 0
                         ? <p className="text-s text-white">.</p>
                         : <p className="text-s note-hover-text"> {content} </p>  
@@ -52,16 +53,16 @@ return (
 
             <div
                 className="hover:bg-gray-100 hover:rounded-full"
-                onMouseEnter={() => setIsPinHovered(true)}
-                onMouseLeave={() => setIsPinHovered(false)}
+                onMouseEnter={() => setIsDoneHovered(true)}
+                onMouseLeave={() => setIsDoneHovered(false)}
             >
-                <MdOutlinePushPin
+                <LuCircleCheckBig
                     className={`icon-btn hover:icon-btn ${
-                        (isPinned && !isPinHovered) || (!isPinned && isPinHovered)
+                        (isDone && !isDoneHovered) || (!isDone && isDoneHovered)
                             ? "text-green"
                             : "text-slate-300"
                     } m-3`} 
-                    onClick={onPinNote}
+                    onClick={onDoneNote}
                 />
             </div>
         </div>

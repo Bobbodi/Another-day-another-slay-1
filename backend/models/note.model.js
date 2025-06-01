@@ -8,7 +8,7 @@ const noteSchema = new Schema({
     priority: { type: Number, default: 0 },
     dueDate: { type: Date, default: new Date().getTime()},
     tags: { type: [String], default:[]  },
-    isPinned: { type: Boolean, default: false },
+    isDone: { type: Boolean, default: false },
     
     userId: { type: String , required: true},
     createdOn: { type: Date, default: new Date().getTime() },

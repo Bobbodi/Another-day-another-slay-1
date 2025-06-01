@@ -4,27 +4,28 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useState, useEffect } from 'react';
 import { getInitials } from '../../utils/helper';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaTasks, FaBook, FaChartLine } from "react-icons/fa";
 import avatarSample from "../../assets/images/avatar-sample.jpg"
 
-
-import { PieChart } from '@mui/x-charts/PieChart';
-import { desktopOS, valueFormatter } from './webUsageStats';
-import { ScatterChart } from '@mui/x-charts/ScatterChart';
-import { dataset, chartSetting } from './scatterStats'
-
 const Profile = () => {
-
   const [userInfo, setUserInfo] = useState(null); 
   const [allNotes, setAllNotes] = useState([]);
+  const [stats, setStats] = useState({
+    tasks: 0,
+    journals: 0,
+    studySessions: 0
+  });
 
   const navigate = useNavigate();
 
   useEffect(() => { 
-      getUserInfo(); 
-      getAllNotes();
-      return () => {};
+    getUserInfo(); 
+    getAllNotes();
+    // Add other data fetching here
+    return () => {};
   }, [])
+
+  // ... existing getUserInfo and getAllNotes functions ..
       
 
   const getUserInfo = async () => { 
@@ -61,105 +62,122 @@ const Profile = () => {
     navigate("/profile/editprofile");
   }
 
-
   return (
     <>
       <Navbarv3 userInfo={userInfo}/>
 
-      <div className="flex">
-        <div className="flex flex-col items-center justify-center bg-yellow h-screen w-[30vw] overflow-auto"> 
-          
-          <div className="w-40 h-40 flex items-center justify-center rounded-full overflow-hidden bg-red my-3 border-2 border-white shadow-md">
-            <img 
-              src={avatarSample} 
-              alt="User Avatar"
-              className="w-full h-full object-cover"
-            />
+      <div className="flex flex-col md:flex-row min-h-[calc(100vh-64px)]">
+        {/* Left Side - Profile Info (30% width) */}
+        <div className="w-full md:w-[30%] bg-yellow-400 p-8 flex flex-col items-center">
+          <div className="relative group">
+            <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg mb-6">
+              <img 
+                src={avatarSample} 
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <button 
+              onClick={onEditAvatar}
+              className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              Edit
+            </button>
           </div>
 
-
-          <table class="table-auto text-lg">
-            <tbody>
-              <tr>
-                <td class="px-2">Username</td>
-                <td class="text-red">{userInfo?.fullName}</td>
-              </tr>
-              <tr>
-                <td class="px-2">Email</td>
-                <td class="text-red">{userInfo?.email}</td>
-              </tr>
-            </tbody>
-          </table> 
-
-          <button className = "mt-4" onClick={onEditProfile}>
-            <div className="w-40 flex items-center p-1.5 bg-slate-100 rounded-full hover:bg-red"> 
-              <p className= "mx-3"> Edit Details </p>
-              <FaArrowRight className="mx-1"/>
+          <div className="bg-white rounded-xl p-6 w-full shadow-md mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              {userInfo?.fullName || 'User'}
+            </h2>
+            
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-gray-800">{userInfo?.email}</p>
+              </div>
               
-            </div> 
-          </button>
+              <div>
+                <p className="text-sm text-gray-500">Member Since</p>
+                <p className="text-gray-800">
+                  {new Date(userInfo?.createdOn).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
 
+            <button 
+              onClick={onEditProfile}
+              className="mt-6 w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-between transition-colors"
+            >
+              <span>Edit Profile</span>
+              <FaArrowRight />
+            </button>
+          </div>
+        </div>
+
+        {/* Right Side - Stats (70% width) */}
+        <div className="w-full md:w-[70%] bg-gray-50 p-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-8">Your Statistics</h1>
           
-           <button className = "mt-4" onClick={onEditAvatar}>
-              <div className="w-40 flex items-center p-1.5 bg-slate-100 rounded-full hover:bg-red"> 
-              <p className= "mx-3"> Edit Avatar </p>
-              <FaArrowRight className="mx-1"/>
-            </div> 
-           </button>
-          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Task Stats Card */}
+            <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-blue-100 rounded-full mr-4">
+                  <FaTasks className="text-blue-500 text-xl"/>
+                </div>
+                <h3 className="text-xl font-semibold">Tasks</h3>
+              </div>
+              <p className="text-4xl font-bold text-gray-800 mb-2">{allNotes.length}</p>
+              <p className="text-gray-500">Pending tasks</p>
+            </div>
 
-        </div> 
+            {/* Journal Stats Card */}
+            <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-green-100 rounded-full mr-4">
+                  <FaBook className="text-green-500 text-xl"/>
+                </div>
+                <h3 className="text-xl font-semibold">Journals</h3>
+              </div>
+              <p className="text-4xl font-bold text-gray-800 mb-2">0</p>
+              <p className="text-gray-500">Entries this month</p>
+            </div>
 
-        <div className="flex flex-col justify-center items-center w-full"> 
-          <p className="text-white text-xl flex justify-center items-center"> Your Statistics </p> 
-          
-          <div className="flex flex-row grid grid-cols-2 m-6
-            rounded-2xl p-4 bg-white hover:shadow-2xl transition-all 
-            duration-200 ease-in-out group">
-            
-              <PieChart
-                series={[
-                  {
-                    data: desktopOS,
-                    highlightScope: { fade: 'global', highlight: 'item' },
-                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
-                    valueFormatter,
-                  },
-                ]}
-                height={200}
-                width={200}
-              />
+            {/* Study Stats Card */}
+            <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-purple-100 rounded-full mr-4">
+                  <FaChartLine className="text-purple-500 text-xl"/>
+                </div>
+                <h3 className="text-xl font-semibold">Study</h3>
+              </div>
+              <p className="text-4xl font-bold text-gray-800 mb-2">0</p>
+              <p className="text-gray-500">Hours this week</p>
+            </div>
+          </div>
 
-              <ScatterChart
-                dataset={dataset}
-                series={[
-                  { datasetKeys: { id: 'version', x: 'a1', y: 'a2' }, label: 'Series A' },
-                  { datasetKeys: { id: 'version', x: 'b1', y: 'b2' }, label: 'Series B' },
-                ]}
-                {...chartSetting}
-              />
-            
-
-          
-
-
-          </div> 
-        </div> 
-
-    
-
-
-    
-  
-
-
-      </div> 
+          {/* Recent Activity Section */}
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+            <div className="space-y-4">
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                <p>Created task "Complete project" - 2 days ago</p>
+              </div>
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <p>Added journal entry - 3 days ago</p>
+              </div>
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                <p>Completed 2 hour study session - 4 days ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   )
 }
 
 export default Profile
-
-{/* <div className="flex flex-row grid grid-cols-3 gap-4 m-4"> 
-            <p className="w-full"> Number of Pending Tasks: {allNotes.length} </p> 
-          </div> */}
