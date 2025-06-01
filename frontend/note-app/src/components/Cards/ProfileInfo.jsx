@@ -2,6 +2,7 @@ import React from 'react'
 import { getInitials } from '../../utils/helper'
 import { BsFillJournalBookmarkFill } from "react-icons/bs";
 import { PiStudentBold } from "react-icons/pi";
+import { FaBook } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
 import { FaBookOpenReader } from "react-icons/fa6";
@@ -21,14 +22,14 @@ const ProfileInfo = ({ userInfo, onLogout, onProfile, onFriends, onJournal, onSt
       `}
       onClick={onTasks}> </FaTasks>
 
-      <BsFillJournalBookmarkFill className={`
+      <FaBook className={`
         text-2xl 
         ${isJournal ? 'p-1 border-0.5 border-transparent shadow-[0_0_0_4px_var(--color-dark)] rounded-sm' : ''} 
         ${isJournal ? 'text-dark' : 'text-darkgreen'}
         ${isJournal ? 'hover:text-dark': 'hover:text-red'}
       `}
       
-      onClick={onJournal}> </BsFillJournalBookmarkFill>
+      onClick={onJournal}> </FaBook>
 
       <FaUserFriends className={`
         text-2xl 

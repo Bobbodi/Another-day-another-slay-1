@@ -169,7 +169,7 @@ app.post("/add-note", authenticateToken, async (req, res) => {
 
 app.put("/edit-note/:noteId", authenticateToken, async (req, res) => { 
     const noteId = req.params.noteId;
-    const { title, content, priority, dueDate, tags, isPinned } = req.body || {}; 
+    const { title, content, priority, dueDate, tags, isDone } = req.body || {}; 
     const { user } = req.user;
 
     if (!title && !content && !priority && !dueDate && !tags) { 
@@ -190,7 +190,7 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
         if (priority) note.priority = priority;
         if (dueDate) note.dueDate = dueDate;
         if (tags) note.tags = tags;
-        if (isPinned) note.isPinned = isPinned;
+        if (isDone) note.isDone = isDone;
         
         await note.save(); 
 
@@ -205,7 +205,7 @@ app.get("/get-all-notes/", authenticateToken, async (req, res) => {
 
     try { 
         const notes = await Note.find({ userId: user._id})
-        .sort({ isPinned: -1});
+        .sort({ isDone: -1});
 
         return res.json({ error: false, notes, message: "All notes retrieved successfully"})
     } catch (error) { 
@@ -236,9 +236,9 @@ app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
 })
 
 
-app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => { 
+app.put("/update-note-done/:noteId", authenticateToken, async (req, res) => { 
     const noteId = req.params.noteId;
-    const { isPinned } = req.body || {}; 
+    const { isDone } = req.body || {}; 
     const { user } = req.user;
 
     try { 
@@ -248,7 +248,7 @@ app.put("/update-note-pinned/:noteId", authenticateToken, async (req, res) => {
             return res.status(400).json({error: true, message: "Note not found"});
         }
         
-        note.isPinned = isPinned || false;
+        note.isDone = isDone || false;
         
         await note.save(); 
 
@@ -272,6 +272,7 @@ app.get("/search-notes/", authenticateToken, async (req, res) => {
             $or: [
                 {title: {$regex: new RegExp(query, 'i')}},
                 {content: {$regex: new RegExp(query, "i")}},
+                {tags: {$regex: new RegExp(query, "i")}},
             ],
         })
         return res.json({ error: false, 
@@ -328,25 +329,20 @@ app.get("/get-all-journal/", authenticateToken, async (req, res) => {
     }
 })
 
-//FRIENDS
-app.post("/add-friends", authenticateToken, async (req, res) => { 
-    console.log(req.body);
-    const { person1, person2, status } = req.body;  
+app.delete("/delete-journal/:journalId", authenticateToken, async (req, res) => { 
+    const journalId = req.params.journalId;
+    const { user } = req.user;
 
     try { 
-        const friendship = new Friends({
-            person1,
-            person2, 
-            status
-        });
+        const journal = await Journal.findOne({ _id: journalId });
 
-        await friendship.save(); 
+        if (!journal) { 
+            return res.status(404).json({ error: true, message: "Journal not found" })
+        }
+        
+        await Journal.deleteOne({ _id: journalId });
 
-        return res.json({
-            error: false,
-            friendship, 
-            message: "Friendship added successfully",
-        }) 
+        return res.json({ error: false, message: "Journal deleted successfully" })
     } catch (error) { 
         return res.status(500).json({ 
             error: true, 
@@ -355,6 +351,99 @@ app.post("/add-friends", authenticateToken, async (req, res) => {
     }
 })
 
+//FRIENDS
+//person 1 has status 0/1/2 with person 2
+//change the logic to add friends depending on the person ID 
+//1. accept friend request 
+//2. reject friend request 
+app.post("/send-friend-request", authenticateToken, async (req, res) => { 
+    const { person1, person2 } = req.body;
+
+    try {
+        // Check if friendship already exists
+        const existingFriendship = await Friends.findOne({
+            $or: [
+                { person1, person2 },
+                { person1: person2, person2: person1 }
+            ]
+        });
+
+        if (existingFriendship) {
+            return res.status(400).json({
+                error: true,
+                message: existingFriendship.status === 1 
+                    ? "Friend request already pending" 
+                    : "You are already friends"
+            });
+        }
+
+        const friendship = new Friends({
+            person1,
+            person2, 
+            status: 1 // 1 = pending
+        });
+
+        await friendship.save();
+
+        return res.json({
+            error: false,
+            friendship, 
+            message: "Friend request sent successfully",
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        });
+    }
+});
+
+//accept friend request. person1 is sending a friend request to person 2
+//so person2 is the one that accepts it 
+app.put("/accept-friend-request/:friendshipId", authenticateToken, async (req, res) => { 
+    const { user } = req.user;
+    const friendshipId = req.params.friendshipId;
+
+    try { 
+        const friendship = await Friends.findOne({ _id: friendshipId });
+        //, person2: user._id
+        if (!friendship) { 
+            return res.status(400).json({error: true, message: "Friendship not found"});
+        }
+        
+        friendship.status = 2
+        
+        await friendship.save(); 
+
+        return res.json({ error: false, friendship, message: "Accept friend request updated successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error"})
+    }
+})
+
+//delete friend request. person1 is sending a friend request to person 2
+//so person2 is the one that deletes it 
+app.put("/delete-friend-request/:friendshipId", authenticateToken, async (req, res) => { 
+    const { user } = req.user;
+    const friendshipId = req.params.friendshipId;
+
+    try { 
+        const friendship = await Friends.findOne({ _id: friendshipId });
+        //, person2: user._id
+        if (!friendship) { 
+            return res.status(400).json({error: true, message: "Friendship not found"});
+        }
+        
+        await Friends.deleteOne({ _id: friendshipId });
+
+        return res.json({ error: false, friendship, message: "Delete friend request updated successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error"})
+    }
+})
+
+//friendships where status = 2 (already friends)
 app.get("/get-all-friends/", authenticateToken, async (req, res) => { 
     const { user } = req.user; 
 
@@ -363,8 +452,9 @@ app.get("/get-all-friends/", authenticateToken, async (req, res) => {
             $or: [
                 { person1: user._id },
                 { person2: user._id }
-            ]
-        }).sort({ status: 1 });
+            ],
+            status: 2,
+        })
 
         // 2. Get all unique friend IDs (excluding the current user)
         const friendIds = friendships.map(f => 
@@ -375,15 +465,89 @@ app.get("/get-all-friends/", authenticateToken, async (req, res) => {
         const friends = await User.find(
             { _id: { $in: friendIds } },
             { fullName: 1 } // Only return name field
-        );
+        ).lean();
 
-        return res.json({ error: false, friends, message: "All friends' name retrieved successfully"})
+        // Attach friendshipId to each friend
+        const result = friendships.map(f => ({
+            ...friends.find(friend => 
+                friend._id.toString() === 
+                (f.person1.toString() === user._id.toString() ? f.person2 : f.person1).toString()
+            ),
+            friendshipId: f._id
+        }));
+
+        console.log(result);
+
+        return res.json({ error: false, friends: result, message: "All friends' name retrieved successfully"})
     } catch (error) { 
         return res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 })
 
-app.get("/search-people/", authenticateToken, async (req, res) => { 
+//friendships where status = 1 (pending friend req)
+app.get("/get-friend-requests/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        // 1. Get incoming requests (where person2 is current user)
+        const incomingRequests = await Friends.find({
+            person2: user._id,
+            status: 1
+        }).lean();
+
+        // 2. Get sent requests (where person1 is current user)
+        const sentRequests = await Friends.find({
+            person1: user._id,
+            status: 1
+        }).lean();
+
+        // 3. Get user details for all involved users
+        const allFriendIds = [
+            ...incomingRequests.map(f => f.person1),
+            ...sentRequests.map(f => f.person2)
+        ];
+
+        const users = await User.find(
+            { _id: { $in: allFriendIds } },
+            { fullName: 1 }
+        ).lean();
+
+        // 4. Process incoming requests
+        const processedIncoming = incomingRequests.map(f => {
+            const requester = users.find(u => u._id.toString() === f.person1.toString());
+            return {
+                ...requester,
+                friendshipId: f._id,
+            };
+        });
+
+        // 5. Process sent requests
+        const processedSent = sentRequests.map(f => {
+            const recipient = users.find(u => u._id.toString() === f.person2.toString());
+            return {
+                ...recipient,
+                friendshipId: f._id,
+            };
+        });
+
+        return res.json({ 
+            error: false, 
+            incomingFriendRequests: processedIncoming,
+            sentFriendRequests: processedSent,
+            message: "Friend requests retrieved successfully"
+        });
+    
+    } catch (error) { 
+        console.error(error);
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error" 
+        });
+    }
+});
+
+//can only search for users where friendships != 1 or 2 (not friends)
+app.get("/search-users/", authenticateToken, async (req, res) => { 
     const { user } = req.user; 
     const { query } = req.query; 
 
@@ -392,37 +556,50 @@ app.get("/search-people/", authenticateToken, async (req, res) => {
     }
 
     try { 
-        const matchingPeople = await User.find({ 
-            _id: { $ne: user._id }, 
+        // 1. Find all friendships involving the current user
+        const friendships = await Friends.find({
             $or: [
-                {fullName: {$regex: new RegExp(query, 'i')}},
-                {email: {$regex: new RegExp(query, "i")}},
-            ],
-        })
+                { person1: user._id },
+                { person2: user._id }
+            ]
+        });
 
-        console.log("People: "+matchingPeople);
+        // 2. Collect all user IDs that are already friends or have pending requests
+        const excludedIds = friendships.flatMap(f => [
+            f.person1.toString(),
+            f.person2.toString()
+        ]);
+        // Always exclude self
+        excludedIds.push(user._id.toString());
 
-        return res.json({ error: false, 
-            people: matchingPeople, 
-            message: "People found"
-        })
+        // 3. Find users not in excludedIds and matching the query
+        const matchingPeople = await User.find({ 
+            _id: { $nin: excludedIds },
+            fullName: { $regex: new RegExp(query, 'i') }
+        });
+
+        return res.json({ error: false, users: matchingPeople, message: "users found" });
         
     } catch (error) {
-        return res.status(500).json({ error: true, message: "Internal Server Error"})
+        return res.status(500).json({ error: true, message: "Internal Server Error"});
     }
-})
+});
 
-app.get("/get-all-people/", authenticateToken, async (req, res) => { 
+app.get("/get-all-users/", authenticateToken, async (req, res) => { 
     const { user } = req.user; 
 
     try { 
-        const people = await User.find({ userId: user._id})
-
-        return res.json({ error: false, people, message: "All people retrieved successfully"})
+        const users = await User.find()
+        console.log(users);
+        return res.json({ error: false, users, message: "All users retrieved successfully"})
     } catch (error) { 
         return res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 })
+
+
+
+
 
 app.listen(8000);
 module.exports = app;

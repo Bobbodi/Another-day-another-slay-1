@@ -23,7 +23,7 @@
   }
 
   body { 
-    background-color: var(--color-darkgreen);
+    /*background-color: var(--color-darkgreen);*/
     overflow-x: hidden;
     margin: 0;
   }

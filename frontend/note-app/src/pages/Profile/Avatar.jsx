@@ -79,10 +79,10 @@ export default Avatar
 //                       priority={item.priority}
 //                       deadline={item.dueDate}
 //                       tags={item.tags}
-//                       isPinned={item.isPinned}
+//                       isDone={item.isDone}
 //                       onEdit={() => handleEdit(item)}
 //                       onDelete={() => deleteNote(item)}
-//                       onPinNote={() => updateIsPinned(item)}
+//                       onDoneNote={() => updateIsDone(item)}
 //                       hovered={hoveredNoteId===item._id}
 //                       onMouseEnter={() => setHoveredNoteId(item._id)}
 //                       onMouseLeave={() => setHoveredNoteId(null)}

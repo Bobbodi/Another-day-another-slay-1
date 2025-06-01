@@ -77,7 +77,7 @@ const SearchBarWithResults = () => {
           value={searchQuery}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder="Search people..."
+          placeholder="Search users..."
           style={{
             padding: '10px',
             width: '300px',

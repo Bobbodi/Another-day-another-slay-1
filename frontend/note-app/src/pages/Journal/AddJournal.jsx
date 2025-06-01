@@ -35,7 +35,6 @@ const AddNotes = ({ nodeData, getAllJournal, onClose }) => {
         })
 
         if (response.data && response.data.journal) { 
-          console.log("here3")
           getAllJournal()
           onClose()
         } 
@@ -58,45 +57,56 @@ const AddNotes = ({ nodeData, getAllJournal, onClose }) => {
       addNewJournal();
     }
 
-  return (
-    <div className='relative'>
+return (
+  <div className="relative p-6 bg-white rounded-lg max-w-lg mx-auto">
+    {/* Close Button */}
+    <button
+      className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors"
+      onClick={onClose}
+      aria-label="Close modal"
+    >
+      <MdClose className="text-xl text-gray-500 hover:text-red-500" />
+    </button>
 
-      <button
-        className="p-2 rounded-full flex items-center justify-center absolute -top-3 -right-3"
-        onClick={onClose}
-      >
-        <MdClose className="text-xl text-slate-400 hover:text-red" />
-      </button>
-
-      <div className="flex flex-col gap-2">
-        <label className="input-label text-2xl">Date</label>
-        <p>{weekday}, {month} {day}, {year}</p>
+    <div className="space-y-6">
+      {/* Date Display */}
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-medium text-gray-700">Date</label>
+        <p className="text-lg font-medium text-blue-500">
+          {weekday}, {month} {day}, {year}
+        </p>
       </div>
-  
-      <div className="flex flex-col gap-2 mt-4">
-        <label className="input-label">Yap Time</label>
+      
+      {/* Journal Entry */}
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-medium text-gray-700">Yap Time</label>
         <textarea
-          type="text"
-          className="text-sm text-blue outline-none bg-slate-50 p-2 rounded-xl"
-          placeholder="yap yap yap"
-          rows={5}
+          className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[150px]"
+          placeholder="What's on your mind today?"
           value={entry}
           onChange={({ target }) => setEntry(target.value)}
           onKeyDown={onKeyDown}
+          
         />
       </div>
 
-      {error && <p className="text-red-500 text-xs pt-4"> {error} </p>}
+      {/* Error Message */}
+      {error && (
+        <p className="text-red-500 text-sm py-2">
+          {error}
+        </p>
+      )}
 
+      {/* Submit Button */}
       <button
-        className="btn-secondary"
+        className="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
         onClick={handleAddNode}
-        onKeyDown={onKeyDown}
       >
         Yap time over
       </button>
     </div>
-  )
+  </div>
+)
 }
 
 export default AddNotes

@@ -1,8 +1,13 @@
 import React from 'react'
 import TagInput from '../../components/Input/TagInput'
 import { useState } from 'react'
-import { MdClose } from "react-icons/md"
+//icons
+
+import { MdClose, MdArrowDropDown } from 'react-icons/md';
+//backend
 import axiosInstance from '../../utils/axiosInstance'
+
+
 
 const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }) => {
 
@@ -15,6 +20,12 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
     const [dueDate, setDueDate] = useState(nodeData2.dueDate);
 
     const [error, setError] = useState(null); 
+
+    // Dropdown states
+    const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+    const [showDateDropdown, setShowDateDropdown] = useState(false);
+    const priorityOptions = [0, 1, 2, 3, 4, 5];
+
 
     const onKeyDown = (e) => { 
         if (type ==='edit' && e.key === 'Enter') { 
@@ -29,13 +40,11 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
     const addNewNote = async () => {
       
       try { 
-        console.log("here2")
         const response = await axiosInstance.post("/add-note", { 
           title, content, priority, dueDate, tags,
         })
 
         if (response.data && response.data.note) { 
-          console.log("here3")
           showToastMessage("Note Added Succesfully")
           getAllNotes()
           onClose()
@@ -88,90 +97,237 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
       }
     }
 
-  return (
-    <div className='relative'>
-
+return (
+    <div className="relative p-6 bg-white rounded-lg max-w-md mx-auto">
+      {/* Close Button */}
       <button
-        className="p-2 rounded-full flex items-center justify-center absolute -top-3 -right-3"
+        className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors"
         onClick={onClose}
+        aria-label="Close modal"
       >
-        <MdClose className="text-xl text-slate-400 hover:text-red" />
+        <MdClose className="text-xl text-gray-500 hover:text-red-500" />
       </button>
 
-      <div className="flex flex-col gap-2">
-        <label className="input-label text-2xl">Title</label>
-        <input
-          type="text"
-          className="text-xl text-blue outline-none p-2"
-          placeholder="Study BTT tmr"
-          value={title}
-          onChange={({ target }) => setTitle(target.value)}
-          onKeyDown={onKeyDown}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2 mt-4">
-        <label className="input-label">Details</label>
-        <textarea
-          type="text"
-          className="text-sm text-blue outline-none bg-slate-50 p-2 rounded-xl"
-          placeholder="Location at Bukit Batok"
-          rows={2}
-          value={content}
-          onChange={({ target }) => setContent(target.value)}
-          onKeyDown={onKeyDown}
-        />
-      </div>
-
-    <div className="flex flex-row justify-between">
-    
-      <div className="flex flex-col gap-2 mt-4">
-        <label className="input-label">Priority (0-5):</label>
-        <input 
-          type="number" 
-          className="text-l text-blue outline-none bg-slate-50  rounded-xl p-2"
-          placeholder='0' 
-          min="0" 
-          max="5"
-          value={priority}
-          onChange={({ target }) => setPriority(target.value)} 
-          onKeyDown={onKeyDown}
-          />
-      </div>
-
-      <div className="flex flex-col gap-2 mt-4">
-        <label className="input-label">Due Date (if any)</label>
+      <div className="space-y-6">
+        {/* Title */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-gray-700">Title</label>
           <input
-            className="text-l text-blue outline-none bg-slate-50  rounded-xl p-2"
-            placeholder='2025-05-22T22:26'
-            type="datetime-local"
-            id="meeting-time"
-            name="meeting-time"
-            min="2025-05-22T22:26"
-            max="2100-05-22T00:00"
-            value={dueDate}
-            onChange={({ target }) => setDueDate(target.value)}  
-            onKeyDown={onKeyDown}/>
+            type="text"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Study BTT tomorrow"
+            value={title}
+            onChange={({ target }) => setTitle(target.value)}
+            onKeyDown={onKeyDown}
+          />
+        </div>
+
+        {/* Details */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-gray-700">Details</label>
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+            placeholder="Location at Bukit Batok"
+            value={content}
+            onChange={({ target }) => setContent(target.value)}
+            onKeyDown={onKeyDown}
+          />
+        </div>
+
+        {/* Priority & Due Date Row */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        {/* Priority Dropdown */}
+        <div className="flex-1">
+          <div className="flex items-center border-b border-gray-300 py-2">
+            <span className="text-sm font-medium text-gray-700 mr-2">Priority</span>
+            <button 
+              className="ml-auto flex items-center"
+              onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
+            >
+              <span className="mr-1">{priority || 'None'}</span>
+              <MdArrowDropDown className="text-xl text-gray-500" />
+            </button>
+          </div>
+          
+          {showPriorityDropdown && (
+            <div className="absolute z-10 mt-1 w-[calc(50%-0.5rem)] bg-white border border-gray-300 rounded-lg shadow-lg">
+              {priorityOptions.map(option => (
+                <div
+                  key={option}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    setPriority(option.toString());
+                    setShowPriorityDropdown(false);
+                  }}
+                >
+                  {option}
+                </div>
+              ))}
+              <div
+                className="p-2 hover:bg-gray-100 cursor-pointer border-t border-gray-200"
+                onClick={() => {
+                  setPriority('');
+                  setShowPriorityDropdown(false);
+                }}
+              >
+                Clear
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Due Date Dropdown */}
+        <div className="flex-1">
+          <div className="flex items-center border-b border-gray-300 py-2">
+            <span className="text-sm font-medium text-gray-700 mr-2">DueDate</span>
+            <button 
+              className="ml-auto flex items-center"
+              onClick={() => setShowDateDropdown(!showDateDropdown)}
+            >
+              <span className="mr-1">
+                {dueDate ? new Date(dueDate).toLocaleDateString() : 'None'}
+              </span>
+              <MdArrowDropDown className="text-xl text-gray-500" />
+            </button>
+          </div>
+          
+          {showDateDropdown && (
+            <div className="absolute z-10 mt-1 w-[calc(50%-0.5rem)] bg-white p-3 border border-gray-300 rounded-lg shadow-lg">
+              <input
+                type="datetime-local"
+                className="w-full p-2 border border-gray-300 rounded"
+                min={new Date().toISOString().slice(0, 16)}
+                value={dueDate}
+                onChange={({ target }) => setDueDate(target.value)}
+              />
+              <div className="flex justify-end mt-2 space-x-2">
+                <button 
+                  className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+                  onClick={() => {
+                    setDueDate('');
+                    setShowDateDropdown(false);
+                  }}
+                >
+                  Clear
+                </button>
+                <button 
+                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                  onClick={() => setShowDateDropdown(false)}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div> 
 
-      
+        {/* Tags */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-gray-700">Tags</label>
+          <TagInput tags={tags} setTags={setTags} />
+        </div>
 
-      <div className="flex flex-col mt-3">
-        <label className="input-label mb-2">Tags</label>
-        <TagInput tags={tags} setTags={setTags} />
+        {/* Error Message */}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        {/* Submit Button */}
+        <button
+          className="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+          onClick={handleAddNode}
+        >
+          {type === 'edit' ? 'Save Changes' : 'Add Note'}
+        </button>
       </div>
-
-      {error && <p className="text-red-500 text-xs pt-4"> {error} </p>}
-      <button
-        className="btn-secondary"
-        onClick={handleAddNode}
-        onKeyDown={onKeyDown}
-      >
-        {type === 'edit' ? 'Save' : 'Add'}
-      </button>
     </div>
-  )
+  );
 }
 
 export default AddEditNotes
+
+
+
+// return (
+//     <div className='relative'>
+
+//       <button
+//         className="p-2 rounded-full flex items-center justify-center absolute -top-3 -right-3"
+//         onClick={onClose}
+//       >
+//         <MdClose className="text-xl text-slate-400 hover:text-red" />
+//       </button>
+
+//       <div className="flex flex-col gap-2">
+//         <label className="input-label text-2xl">Title</label>
+//         <input
+//           type="text"
+//           className="text-xl text-blue outline-none p-2"
+//           placeholder="Study BTT tmr"
+//           value={title}
+//           onChange={({ target }) => setTitle(target.value)}
+//           onKeyDown={onKeyDown}
+//         />
+//       </div>
+
+//       <div className="flex flex-col gap-2 mt-4">
+//         <label className="input-label">Details</label>
+//         <textarea
+//           type="text"
+//           className="text-sm text-blue outline-none bg-slate-50 p-2 rounded-xl"
+//           placeholder="Location at Bukit Batok"
+//           rows={2}
+//           value={content}
+//           onChange={({ target }) => setContent(target.value)}
+//           onKeyDown={onKeyDown}
+//         />
+//       </div>
+
+//     <div className="flex flex-row justify-between">
+    
+//       <div className="flex flex-col gap-2 mt-4">
+//         <label className="input-label">Priority (0-5):</label>
+//         <input 
+//           type="number" 
+//           className="text-l text-blue outline-none bg-slate-50  rounded-xl p-2"
+//           placeholder='0' 
+//           min="0" 
+//           max="5"
+//           value={priority}
+//           onChange={({ target }) => setPriority(target.value)} 
+//           onKeyDown={onKeyDown}
+//           />
+//       </div>
+
+//       <div className="flex flex-col gap-2 mt-4">
+//         <label className="input-label">Due Date (if any)</label>
+//           <input
+//             className="text-l text-blue outline-none bg-slate-50  rounded-xl p-2"
+//             placeholder='2025-05-22T22:26'
+//             type="datetime-local"
+//             id="meeting-time"
+//             name="meeting-time"
+//             min="2025-05-22T22:26"
+//             max="2100-05-22T00:00"
+//             value={dueDate}
+//             onChange={({ target }) => setDueDate(target.value)}  
+//             onKeyDown={onKeyDown}/>
+//       </div>
+//     </div> 
+
+      
+
+//       <div className="flex flex-col mt-3">
+//         <label className="input-label mb-2">Tags</label>
+//         <TagInput tags={tags} setTags={setTags} />
+//       </div>
+
+//       {error && <p className="text-red-500 text-xs pt-4"> {error} </p>}
+//       <button
+//         className="btn-secondary"
+//         onClick={handleAddNode}
+//         onKeyDown={onKeyDown}
+//       >
+//         {type === 'edit' ? 'Save' : 'Add'}
+//       </button>
+//     </div>
+//   )
