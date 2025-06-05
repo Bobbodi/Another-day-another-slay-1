@@ -9,6 +9,7 @@ const User = require("./models/user.model");
 const Note = require("./models/note.model");
 const Journal = require("./models/journal.model");
 const Friends = require("./models/friends.model");
+const StudyRoom = require("./models/studyroom.model");
 
 const express = require("express");
 const cors = require("cors");
@@ -597,8 +598,41 @@ app.get("/get-all-users/", authenticateToken, async (req, res) => {
     }
 })
 
+//STUDY ROOM 
+app.get("/get-all-studyroom/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
 
+    try { 
+        const studyRoom = await StudyRoom.find({ owner: user._id})
+        .sort({ createdOn: -1});
 
+        return res.json({ error: false, studyRoom, message: "All study rooms retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+app.delete("/delete-note/:studyroomId", authenticateToken, async (req, res) => { 
+    const studyroomId = req.params.studyroomId;
+    //const { user } = req.user;
+
+    try { 
+        const studyRoom = await StudyRoom.findOne({ _id: studyroomId });
+
+        if (!studyRoom) { 
+            return res.status(404).json({ error: true, message: "Study Room not found" })
+        }
+        
+        await StudyRoom.deleteOne({ _id: studyroomId });
+
+        return res.json({ error: false, message: "Study Room deleted successfully" })
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
 
 
 app.listen(8000);
