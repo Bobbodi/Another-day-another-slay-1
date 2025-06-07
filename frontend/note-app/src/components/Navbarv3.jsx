@@ -1,5 +1,5 @@
 import React from "react";
-import ProfileInfo from "./cards/ProfileInfo";
+import ProfileInfo from "./Cards/ProfileInfo";
 import { useNavigate, useLocation } from "react-router-dom";
 import Tab from "./Cards/Tab";
 
