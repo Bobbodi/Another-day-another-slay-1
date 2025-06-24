@@ -6,7 +6,7 @@ import Signup from './pages/Signup/Signup'
 import Profile from './pages/Profile/Profile'
 import Avatar from './pages/Profile/avatar'
 import EditProfile from './pages/Profile/EditProfile'
-import Journal from './pages/Journal/Journal'
+import Wellness from './pages/Wellness/Wellness'
 import Friends from './pages/Friends/Friends'
 import Study from './pages/Study/Study'
 
@@ -16,7 +16,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} /> {/* Changed to Navigate to login */}
-        <Route path="/journal" element={<Journal />} />
+        <Route path="/wellness" element={<Wellness />} />
         <Route path="/friends" element={<Friends />} />
         <Route path="/study" element={<Study />} />
         <Route path="/profile/avatar" element={<Avatar />} />

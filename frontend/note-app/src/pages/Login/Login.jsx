@@ -70,18 +70,16 @@ const Login = () => {
           </p>
           <ul className="space-y-3">
             <li className="flex items-center">
-              <span className="mr-2">✓</span> AI-assisted study planning
+              <span className="mr-2">✓</span> Study planning
             </li>
             <li className="flex items-center">
-              <span className="mr-2">✓</span> Virtual + Customisable study rooms
+              <span className="mr-2">✓</span> Study rooms
             </li>
             <li className="flex items-center">
-              <span className="mr-2">✓</span> Wellness tools: journaling, mood + sleep trackers
+              <span className="mr-2">✓</span> Wellness tools
             </li>
           </ul>
-          <p className="text-xl my-6">
-            Voted #1 hottest product by Sreya and YX
-          </p>
+          
         </div>
       </div>
 
@@ -90,7 +88,7 @@ const Login = () => {
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
           <form onSubmit={handleLogin}>
             <h4 className="text-2xl font-bold mb-6 text-gray-800">Login</h4>
-
+            <h4 className="text-xl mb-6 text-gray-800">Email: bob@gmail.com, Pwd: bob</h4>
             <div className="mb-4">
               <input
                 type="email"

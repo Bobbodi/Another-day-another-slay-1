@@ -7,22 +7,19 @@ import moment from "moment";
 import { useState } from 'react';
 
 const NoteCard = ({
-    title, date, content, priority, dueDate, tags, isDone, onEdit, onDelete, onDoneNote, hovered, onMouseEnter, onMouseLeave}) => { 
+    title, date, content, priority, dueDate, tags, isDone, isEvent, onEdit, onDelete, onDoneNote, hovered, onMouseEnter, onMouseLeave}) => { 
 
     const [isDoneHovered, setIsDoneHovered] = useState(false);
 
     const displayContent = () => {
         return (
             <>
-            {hovered && content.length == 0
-                ? <p className="text-s text-white"> . </p>  
-                : hovered 
-                ? <p className="text-s note-hover-text whitespace-pre-wrap break-words"> {content} </p>  
-                : content.length > 20 
-                    ? <p className="text-s note-hover-text">{content?.slice(0, 20)}...</p> 
-                    : content.length == 0
-                        ? <p className="text-s text-white">.</p>
-                        : <p className="text-s note-hover-text"> {content} </p>  
+            {hovered 
+                ? <span className="text-xs note-hover-text whitespace-pre-wrap break-words">{content}</span>  
+                : ''
+                // : content.length > 20 
+                //     ? <p className="text-xs note-hover-text">{content?.slice(0, 20)}...</p> 
+                //     : <p className="text-xs note-hover-text">{content}</p>  
             }
             </>
         )
@@ -30,64 +27,119 @@ const NoteCard = ({
 
 return (
     <div
-        className="border rounded-2xl p-4 bg-white hover:shadow-2xl transition-all duration-200 ease-in-out group"
-        style={{ borderColor: "#ffd166", borderWidth: "3px" }}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-    >
-        <style>
-            {`
-                .group:hover {
-                    border-color: #ef476f !important;
-                }
-                .group:hover .note-hover-text {
-                    color: #ef476f !important;
-                }
-            `}
-        </style>
-        <div className="flex items-center justify-between">
-            <div>
-                <h6 className="text-s font-medium note-hover-text">{hovered ? title : title.length > 24 ? `${title?.slice(0, 24)}...` : title}</h6>
-                <span className='text-xs text-slate-500'>{moment(date).format('Do MMM YYYY')}</span>
-            </div>
+  className={`w-82 border-l-4 p-3 bg-white hover:shadow-lg rounded-r-lg transition-all duration-200 ease-in-out group flex flex-row relative ${
+    priority === 3 ? 'border-red-500' :
+    priority === 2 ? 'border-amber-500' :
+    priority === 1 ? 'border-emerald-500':  
+    isEvent ? 'border-blue-500': 
+    'border-gray-400'
+  }`}
+  style={{ borderLeftWidth: '4px' }} // Ensures consistent border width
 
-            <div
-                className="hover:bg-gray-100 hover:rounded-full"
-                onMouseEnter={() => setIsDoneHovered(true)}
-                onMouseLeave={() => setIsDoneHovered(false)}
-            >
-                <LuCircleCheckBig
-                    className={`icon-btn hover:icon-btn ${
-                        (isDone && !isDoneHovered) || (!isDone && isDoneHovered)
-                            ? "text-green"
-                            : "text-slate-300"
-                    } m-3`} 
-                    onClick={onDoneNote}
-                />
-            </div>
-        </div>
-        <p className="text-s note-hover-text"> {displayContent()} </p> 
+  
+  onMouseEnter={onMouseEnter}
+  onMouseLeave={onMouseLeave}
+>
+  {/* Vertical accent line */}
+  
+  <div
+    className="hover:bg-gray-100 hover:rounded-full self-start mt-1" // Added self-start for better alignment
+    onMouseEnter={() => setIsDoneHovered(true)}
+    onMouseLeave={() => setIsDoneHovered(false)}
+  >
+    <LuCircleCheckBig
+      className={`icon-btn text-2xl ${
+        (isDone && !isDoneHovered) || (!isDone && isDoneHovered)
+          ? "text-green-500"
+          : "text-gray-300"
+      } m-2 transition-colors`} 
+      onClick={onDoneNote}
+    />
+  </div>
+
+  <div className="flex flex-col flex-1 ml-1">
+    {/* Title with */}
+    <div className = "flex flex-row justify-between items-center gap-1"> 
+        <h6 className="text-sm font-semibold text-gray-800">
+        {hovered ? title : title.length > 24 ? `${title?.slice(0, 24)}...` : title}
+        </h6>
         
-        <div className="flex items-center justify-between mt-2">
-            <h1 className='text-xs text-slate-500'>Priority: {priority}</h1>
-            <h1 className='text-xs text-slate-500'>Due in: {moment(dueDate).format('Do MMM YYYY')}</h1>
-        </div>
+        {hovered && (
+        <span className='text-xs text-gray-600 font-medium'>
+            {moment(date).format('Do MMM YYYY')}
+        </span>
+        )}
+    </div> 
+  
+    {/* Content with subtle animation */}
+    {hovered && content.length > 0 ? <p className="text-sm text-gray-600 my-2 group-hover:text-gray-800 transition-colors">
+      {displayContent()}
+    </p> : <></>}
+    
+    {hovered ? <div className="flex flex-wrap gap-1 mb-2">
+        {tags.map((item) => (
+          <span 
+            key={item}
+            className=
+            {`text-xs px-2 py-1 rounded-full ${
+              priority === 3 ? 'bg-red-100 text-red-800' :
+              priority === 2 ? 'bg-amber-100 text-amber-800' :
+              'bg-emerald-100 text-emerald-800' // priority=1
+          }`}
+          >
+            #{item}
+          </span>
+        ))} 
+      </div> : <></>}
 
-        <div className="flex items-center justify-between mt-2">
-            <div className="text-xs text-slate-500 note-hover-text">
-                {tags.map((item) => 
-                    `#${item} `
-                )}
-            </div>
-            <div className="flex items-center gap-2">
-                <MdCreate className="text-gray-300 cursor-pointer hover:text-green"
-                    onClick={onEdit} />
-                <MdDelete className="text-gray-300 cursor-pointer hover:text-red"
-                    onClick={onDelete} />
-            </div>
-
-        </div>
+    {/* Footer with priority and actions */}
+    
+    <div className="flex flex-row items-center justify-between w-full pt-2">
+      <div className="flex items-center gap-3">
+        {/* Priority indicator */}
+        
+        {isEvent ? '' : <span className={`text-xs font-medium px-2 py-1 rounded ${
+          priority === 3 ? 'bg-red-100 text-red-800' :
+          priority === 2 ? 'bg-amber-100 text-amber-800' :
+          priority === 1 ? 'bg-emerald-100 text-emerald-800': 
+          'bg-gray-100 text-gray-800' //priority=1
+        }`}>
+          {priority === null ? 'No priority' : priority}
+        </span>}
+        
+        
+        {/* Due date */}
+        {isEvent && dueDate ? 
+          (<div className="gap-1 mb-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800"> 
+            Event
+          </div>)
+          : 
+          (isDone ? '' : <span className={`text-xs font-medium ${
+            dueDate === null ? 'text-gray-500' : 
+            moment(dueDate).diff(moment(), 'hours') < 24 
+              ? 'text-red animate-pulse' 
+              : 'text-gray-500'
+          }`}>
+            {dueDate === null ? 'No deadline' : `Due: ${moment(dueDate).fromNow()}`}
+          </span>)
+        }
+        
+      </div>
+      
+      {/* Action buttons */}
+      <div className="flex items-center gap-3">
+        <MdCreate 
+          className="text-gray-400 hover:text-red cursor-pointer transition-colors text-lg"
+          onClick={onEdit} 
+        />
+        <MdDelete 
+          className="text-gray-400 hover:text-red cursor-pointer transition-colors text-lg"
+          onClick={onDelete} 
+        />
+      </div>
     </div>
+  </div>
+</div>
 )
 
 }

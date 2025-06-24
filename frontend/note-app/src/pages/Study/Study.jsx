@@ -2,14 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbarv3 from '../../components/Navbarv3';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
+
+//components
 import SmallEmptyCard from '../../components/EmptyCard/SmallEmptyCard';
 import StudyCard from '../../components/Cards/StudyCard';
-import AddNotesImg from "../../assets/images/cat.png";
-import { FaPause, FaPlay } from "react-icons/fa6";
-import Star from "../../assets/images/star.png"
+import NoteCard from '../../components/Cards/NoteCard';
 import Modal from "react-modal";
 import AddEditNotes from '../Home/AddEditNotes';
+
+//images
+import Star from "../../assets/images/star.png"
 import Toast from '../../components/ToastMessage/Toast';
+import AddNotesImg from "../../assets/images/cat.png";
+
+//icons
+import { MdAdd } from "react-icons/md";
+import { FaPause, FaPlay } from "react-icons/fa6";
+
 
 
 //SHOW STUDY ROOM (just sample file)
@@ -185,27 +194,27 @@ const Study = () => {
             <Navbarv3 userInfo={userInfo} />
 
             <div className="container mx-auto px-4 py-8">
-                <div className="flex flex-row gap-4 w-full">
+                <div className="flex flex-row gap-4 w-full max-h-100">
                     {/* Left Column - Tasks (25%) */}
                     <div className="w-1/3 bg-white rounded-xl shadow-md p-4">
                         <h3 className="text-xl font-semibold mb-4">Your Tasks</h3>
                         {allNotes.filter(note => !note.isDone).length > 0 ? (
                             <div 
                                 ref={tasksContainerRef}
-                                className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto p-2"
-                                style={{ scrollbarWidth: 'thin' }}
+                                className="grid grid-cols-1 gap-4 max-h-70 overflow-y-auto p-2"
+                                style={{ scrollbarWidth: 'none' }}
                             >
                                 {allNotes
                                     .filter(note => !note.isDone)
                                     .map((item) => (
                                         <div key={item._id} className="h-full">
-                                            <StudyCard 
+                                            <NoteCard 
                                                 title={item.title}
-                                                
+                                                date={item.createdOn}
                                                 content={item.content}
-                                
-                                                deadline={item.dueDate}
-                                               
+                                                priority={item.priority}
+                                                dueDate={item.dueDate}
+                                                tags={item.tags}
                                                 isDone={item.isDone}
                                                 onEdit={() => handleEdit(item)}
                                                 onDelete={() => deleteNote(item)}
@@ -226,14 +235,14 @@ const Study = () => {
                     </div> 
 
                     {/* Middle Column - Timer (50%) */}
-                    <div className={`p-4 bg-gray-100 rounded-lg flex flex-col items-center ${isTimerRunning ? "w-1/2" : "w-2/3"}`}>
+                    <div className={`p-4 bg-yellow-700 rounded-lg flex flex-col items-center ${isTimerRunning ? "w-1/2" : "w-2/3"}`}>
                         <div className="w-full max-w-md">
                             <div className="flex flex-row items-center justify-center gap-3">
                                 <span className="text-5xl font-mono mb-2">{formatTime(elapsedTime)}</span>
                                 
                             
 
-                            <div className="flex flex-row items-center justify-center gap-4">
+                            <div className="flex flex-row items-center justify-center gap-4 mb-2">
                                 {!isTimerRunning ? (
                                     <button
                                         onClick={startTimer}
@@ -262,7 +271,7 @@ const Study = () => {
                             </div>
                         </div>
 
-                        <div className="w-full min-h-screen">
+                        <div className="w-full min-h-70 bg-gray-100">
                         <Canvas camera={{ fov: 64, position: [5, 5, 20] }}>
                                 
                                 <ambientLight intensity={5} />
@@ -270,7 +279,6 @@ const Study = () => {
                                 <Model />
                                 <Environment preset='sunset'/>
                                 <ContactShadows opacity={0.5} scale={100} blur={1} far={10} resolution={256} color="#000000" />
-                        
                         
                         </Canvas>
                         </div> 
@@ -297,8 +305,23 @@ const Study = () => {
                 </div>
             </div>
 
-            {/* Modal */}
-        <Modal 
+        {/* Add Button */}
+        <button
+            className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow-500 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl transition-all z-50"
+            onClick={() => {
+            setOpenAddEditModal({
+                isShown: true,
+                type: "add",
+                data: null,
+            });
+            }}
+            aria-label="Add new note"
+        >
+            <MdAdd className="text-3xl" />
+        </button>
+
+        {/* Modal */}
+         <Modal 
             isOpen={openAddEditModal.isShown}
             onRequestClose={() => setOpenAddEditModal({ isShown: false, type: "add", data: null })}
             style={{

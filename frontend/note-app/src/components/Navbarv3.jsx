@@ -1,7 +1,6 @@
 import React from "react";
-import ProfileInfo from "./Cards/ProfileInfo";
 import { useNavigate, useLocation } from "react-router-dom";
-import Tab from "./Cards/Tab";
+import ProfileInfo from "./cards/ProfileInfo";
 
 const Navbar = ({userInfo}) => {
     
@@ -21,8 +20,8 @@ const Navbar = ({userInfo}) => {
         navigate("/dashboard");
     }
 
-    const onJournal = () => { 
-        navigate("/journal");
+    const onWellness = () => { 
+        navigate("/wellness");
     }
 
     const onFriends = () => { 
@@ -45,11 +44,11 @@ const Navbar = ({userInfo}) => {
                     onLogout={onLogout} 
                     onProfile={onProfile}
                     onFriends={onFriends}
-                    onJournal={onJournal}
+                    onWellness={onWellness}
                     onStudy={onStudy}
                     onTasks={onTasks}
                     isFriends={location.pathname === "/friends"}
-                    isJournal={location.pathname === "/journal"}
+                    isWellness={location.pathname === "/wellness"}
                     isStudy={location.pathname === "/study"}
                     isTasks={location.pathname === "/dashboard"}
                     />

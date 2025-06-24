@@ -244,16 +244,24 @@ const Friends = () => {
         handleClearSearch(); 
     }
 
+    const renderUser = (user) => { 
+        return (
+        <>
+        <div className="w-12 h-12 flex items-center justify-center rounded-full text-white font-medium bg-yellow-700 hover:bg-dark hover:text-white">
+            {getInitials(user?.fullName)}
+        </div>
+        <div className="text-sm my-2">
+            {user?.fullName}
+        </div>
+        </>
+        )
+    }
+
     const renderFriendsList = (users) => (
-    <div className="mt-5 flex flex-row gap-3 justify-center items-center">
+    <div className="mt-5 flex flex-row gap-3 justify-center items-center overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
         {users.map(user => (
         <button className="flex flex-col justify-center items-center" key={user._id}>
-            <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-green hover:bg-red">
-            {getInitials(user?.fullName)}
-            </div>
-            <div className="text-sm my-2">
-            {user?.fullName}
-            </div>
+            {renderUser(user)}
         </button>
         ))}
     </div>
@@ -267,12 +275,7 @@ const Friends = () => {
         <div className="bg-yellow-100 border rounded-lg shadow-md z-10 mt-1 w-full max-w-md">
             {users.map(user => (
                 <div key={user._id} className="flex items-center justify-between p-3 hover:bg-gray-50 border-b last:border-b-0">
-                    <div className="flex items-center">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-500 text-white font-medium mr-3">
-                            {getInitials(user?.fullName)}
-                        </div>
-                        <span className="font-medium">{user.fullName}</span>
-                    </div>
+                    {renderUser(user)}
                     <button 
                         className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors"
                         onClick={() => sendFriendRequest(userInfo._id, user._id)}
@@ -306,15 +309,10 @@ const Friends = () => {
     //People that wanna be friends with you
     const renderIncomingPendingList = (users) => {
         return (
-            <div className="mt-5 flex flex-row gap-3 justify-center items-center">
+            <div className="mt-5 flex flex-row gap-3 justify-center items-center overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                 {users.map(user => (
                     <button className = "flex flex-col justify-center items-center">
-                        <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-green hover:bg-red"> 
-                            {getInitials(user?.fullName)} 
-                        </div> 
-                        <div className="text-sm my-2">
-                            {user?.fullName}
-                        </div> 
+                        {renderUser(user)}
                         <div className="flex flex-row gap-1"> 
                             <button className = "text-center border border-2 rounded-full p-1 hover:text-green" onClick={() => acceptFriendRequest(user)}> 
                                 <AiOutlineCheck/>
@@ -333,15 +331,10 @@ const Friends = () => {
     //Friend Requests that you sent
     const renderSentPendingList = (users) => {
         return (
-            <div className="mt-5 flex flex-row gap-3 justify-center items-center">
+            <div className="mt-5 flex flex-row gap-3 justify-center items-center overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                 {users.map(user => (
                     <button className = "flex flex-col justify-center items-center">
-                        <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-green hover:bg-red"> 
-                            {getInitials(user?.fullName)} 
-                        </div> 
-                        <div className="text-sm my-2">
-                            {user?.fullName}
-                        </div> 
+                        {renderUser(user)}
                         <div className="flex flex-row gap-1"> 
                             <button className = "text-center border border-2 rounded-full p-1 hover:text-red" onClick={() => deleteFriendRequest(user)}> 
                                 <RxCross2/>
@@ -352,9 +345,6 @@ const Friends = () => {
             </div>
         );
     }
-
-    
-
 
     const handleCloseToast = () => { 
         setShowToastMsg({
