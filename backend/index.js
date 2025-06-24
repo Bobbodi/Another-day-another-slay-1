@@ -1,7 +1,11 @@
 require("dotenv").config()
+//const OpenAI = require("openai");
+const { estimateTaskDuration } = require("./helper.js");
+//const date = require("date-fns");
 
 const config = require("./config.json")
 const mongoose = require("mongoose")
+
 
 mongoose.connect(config.connectionString)
 
@@ -10,6 +14,8 @@ const Note = require("./models/note.model");
 const Journal = require("./models/journal.model");
 const Friends = require("./models/friends.model");
 const StudyRoom = require("./models/studyroom.model");
+const Mood = require("./models/mood.model");
+const Sleep = require("./models/sleep.model");
 
 const express = require("express");
 const cors = require("cors");
@@ -27,7 +33,6 @@ app.use(
 );
 
 //TASKS/NOTES!!
-
 app.get("/", (req, res) => { 
     res.json({data: "hello"})
 })
@@ -76,7 +81,6 @@ app.post("/create-account", async (req, res) => {
     });
 
 })
-
 
 app.post("/login", async (req, res) => { 
     console.log(req.body);
@@ -133,9 +137,8 @@ app.get("/get-user", authenticateToken, async (req, res) => {
         message: "" })
 })
 
-
 app.post("/add-note", authenticateToken, async (req, res) => { 
-    const { title, content, priority, dueDate, tags } = req.body; 
+    const { title, content, priority, isEvent, dueDate, whenDone, tags } = req.body; 
     const { user } = req.user; 
 
     if (!title) {
@@ -146,9 +149,11 @@ app.post("/add-note", authenticateToken, async (req, res) => {
         const note = new Note({
             title, 
             content, 
-            priority, 
+            priority: priority || null, 
             dueDate,
+            whenDone, 
             tags: tags || [], 
+            isEvent,
             userId: user._id,
         });
 
@@ -167,13 +172,12 @@ app.post("/add-note", authenticateToken, async (req, res) => {
     }
 })
 
-
 app.put("/edit-note/:noteId", authenticateToken, async (req, res) => { 
     const noteId = req.params.noteId;
-    const { title, content, priority, dueDate, tags, isDone } = req.body || {}; 
+    const { title, content, priority, dueDate, tags, isEvent, whenDone, isDone } = req.body || {}; 
     const { user } = req.user;
 
-    if (!title && !content && !priority && !dueDate && !tags) { 
+    if (!title && !content && !priority && !dueDate && !tags &&!isEvent &&!whenDone) { 
         return res
         .status(400)
         .json({ error: true, message: "No changes provided" })
@@ -190,8 +194,10 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
         if (content) note.content = content;
         if (priority) note.priority = priority;
         if (dueDate) note.dueDate = dueDate;
+        if (whenDone) note.whenDone = whenDone;
         if (tags) note.tags = tags;
         if (isDone) note.isDone = isDone;
+        if (isEvent) note.isEvent = isEvent;
         
         await note.save(); 
 
@@ -205,8 +211,8 @@ app.get("/get-all-notes/", authenticateToken, async (req, res) => {
     const { user } = req.user; 
 
     try { 
-        const notes = await Note.find({ userId: user._id})
-        .sort({ isDone: -1});
+        const notes = await Note.find({ userId: user._id});
+        //.sort({ isDone: -1});
 
         return res.json({ error: false, notes, message: "All notes retrieved successfully"})
     } catch (error) { 
@@ -236,7 +242,6 @@ app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
     }
 })
 
-
 app.put("/update-note-done/:noteId", authenticateToken, async (req, res) => { 
     const noteId = req.params.noteId;
     const { isDone } = req.body || {}; 
@@ -250,6 +255,8 @@ app.put("/update-note-done/:noteId", authenticateToken, async (req, res) => {
         }
         
         note.isDone = isDone || false;
+        //update done date if done
+        isDone ? note.whenDone = new Date().getTime() : note.whenDone = null;
         
         await note.save(); 
 
@@ -284,7 +291,6 @@ app.get("/search-notes/", authenticateToken, async (req, res) => {
         return res.status(500).json({ error: true, message: "Internal Server Error"})
     }
 })
-
 
 //JOURNAL
 app.post("/add-journal", authenticateToken, async (req, res) => { 
@@ -635,5 +641,310 @@ app.delete("/delete-note/:studyroomId", authenticateToken, async (req, res) => {
 })
 
 
+//SUGGESTED NOTES
+app.post('/api/suggest-priority-notes', authenticateToken, async (req, res) => {
+    const { tasks } = req.body; 
+    //console.log('Token:', req.headers.authorization);
+    //console.log(tasks);
+    try {
+        
+        const settings = { 
+            wakeTime: 8, 
+            sleepTime: 23,
+            workHours: 4,
+            minBreak: 5, 
+            maxBreak: 15, 
+            mealBreak: 30, 
+            breakInterval: 90,
+        };
+
+        const parseDueDate = (dueDate) => { 
+            if (!dueDate || dueDate === null) return Infinity; 
+            return new Date(dueDate).getTime();
+        };
+
+        const sortedTasks = [...tasks].sort((a, b) => { 
+            const aDue = parseDueDate(a.dueDate);
+            const bDue = parseDueDate(b.dueDate);
+            if (aDue !== bDue) return aDue - bDue; // Sort by due date first
+            if (a.priority !== b.priority) return b.priority - a.priority; // Then by priority
+            return (a.title.length + a.title.charCodeAt(0)) - (b.title.length + b.title.charCodeAt(0)); // hash for deterministic behaviour
+        });
+
+        //console.log("--------------------------SORTED TASKS-----------")
+        //console.log(sortedTasks);
+
+        //Group tasks by day 
+        const dailySchedule = {}
+        //calculate remaining hours
+        const now = new Date();
+        let currentDay = new Date(now); 
+        const currentHour = now.getHours();
+        let remainingTimeToday;
+
+        if (currentHour >= settings.sleepTime) {
+            //outside working hours (sleeping time)
+            remainingTimeToday = 0;
+        } else {
+            //during working hours
+            const workingHoursLeft = settings.sleepTime - currentHour;
+            remainingTimeToday = Math.min(settings.workHours * 60, workingHoursLeft * 60);
+            
+            //account for minutes in the current hour:
+            const currentMinutes = now.getMinutes();
+            remainingTimeToday -= currentMinutes; // subtract minutes already passed in current hour
+            remainingTimeToday = Math.max(0, remainingTimeToday); // ensure it doesn't go negative
+        }
+
+        for (const task of sortedTasks) { 
+            if (task.isEvent) { 
+                //an event 
+                let dayKey = new Date(task.dueDate).toDateString(); 
+                if (!dailySchedule[dayKey]) { 
+                    dailySchedule[dayKey] = [];
+                }
+                dailySchedule[dayKey].push(task); 
+                continue; 
+            }
+
+            const duration = estimateTaskDuration(task);
+
+
+            //no time to finish today, push to next day
+            if (duration > remainingTimeToday) { 
+                currentDay = new Date(currentDay); 
+                currentDay.setDate(currentDay.getDate() + 1); 
+                remainingTimeToday = settings.workHours * 60; 
+            }
+
+            //Add task to current day 
+            dayKey = currentDay.toDateString(); 
+            if (!dailySchedule[dayKey]) { 
+                dailySchedule[dayKey] = [];
+            }
+            dailySchedule[dayKey].push(task); 
+
+            //updateTimeLeft
+            remainingTimeToday -= duration; 
+            //no time left today, set currentDay to tomorrow
+            if (remainingTimeToday <= 0) {
+                currentDay = new Date(currentDay);
+                currentDay.setDate(currentDay.getDate() + 1);
+                remainingTimeToday = settings.workHours * 60;
+            } else { 
+                const workedSinceLastBreak = duration; 
+                if (workedSinceLastBreak >= settings.breakInterval) { 
+                    const breakDuration = Math.min(Math.max(settings.minBreak, 
+                                                            workedSinceLastBreak/10), //in hours
+                                                   settings.maxBreak); 
+                    remainingTimeToday -= breakDuration; 
+                }
+            }
+        }
+
+
+        //console.log(dailySchedule);
+        //return reuslt 
+        const result = {}
+        Object.keys(dailySchedule).forEach(day => { 
+            const date = new Date(day); 
+            result[date] = dailySchedule[day];
+        });
+
+        //console.log("_-------------------------------");
+        //console.log("RESULT_-------------------------")
+        console.log(result);
+        return res.json({ error: false, result, message: "Schedule retrieved successfully"});
+
+    
+
+
+        
+    } catch (error) {
+        console.log(error); 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+});
+
+//MOOD
+app.post("/add-mood", authenticateToken, async (req, res) => { 
+    console.log(req.body);
+    const { mood } = req.body; 
+    const { user } = req.user; 
+
+    if (!mood) {
+        return res.status(400).json({error: true, message: "Mood is required"});
+    }
+
+    try { 
+        const moodLog = new Mood({
+            mood, 
+            userId: user._id,
+        });
+
+        await moodLog.save(); 
+        console.log("mood added")
+        return res.json({
+            error: false,
+            moodLog, 
+            message: "Mood added successfully",
+        }) 
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
+
+app.get("/get-all-mood/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const moods = await Mood.find({ userId: user._id})
+        .sort({ createdOn: 1});
+
+        return res.json({ error: false, moods, message: "All moods retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+app.delete("/delete-mood/:moodId", authenticateToken, async (req, res) => { 
+    const moodId = req.params.moodId;
+    const { user } = req.user;
+
+    try { 
+        const mood = await Mood.findOne({ _id: moodId });
+
+        if (!mood) { 
+            return res.status(404).json({ error: true, message: "Mood not found" })
+        }
+        
+        await Mood.deleteOne({ _id: moodId });
+
+        return res.json({ error: false, message: "Mood deleted successfully" })
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
+
+
 app.listen(8000);
 module.exports = app;
+
+
+// const response = await openai.chat.completions.create({
+//             model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+//             messages: [
+//                 {
+//                     role: "system",
+//                     content: "You're a productivity assistant that suggests which 3 tasks to focus on today."
+//                 },
+//                 {
+//                     role: "user",
+//                     content: `Suggest which tasks I should do today from these notes, considering priority (5=highest), due dates, and content. Return only the titles in a JSON array: ${JSON.stringify(notesForPrompt)}`
+//                 }
+//             ],
+//             temperature: 0.3,
+//             response_format: { type: "json_object" }
+//         });
+// const openai = new OpenAI({
+//   baseURL: "https://openrouter.ai/api/v1",
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
+
+//ask openai
+// app.post("/api/suggest-priority-notes", authenticateToken, async (req, res) => {
+//     try {
+//         const { notes } = req.body;
+//         if (!notes || !Array.isArray(notes) || notes.length === 0) {
+//             return res.status(400).json({ error: true, message: "No notes provided" });
+//         }
+
+//         // Compose a prompt for OpenAI
+//         const prompt = `Given these tasks:\n${notes.map((n, i) => `${i + 1}. ${n.title} (priority: ${n.priority}, due: ${n.dueDate})`).join('\n')}\nSuggest the top 3 tasks to focus on today. Return only the titles as a JSON array.`;
+
+//         // Call OpenAI
+//         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+//         const completion = await openai.chat.completions.create({
+//             model: "gpt-3.5-turbo",
+//             messages: [{ role: "user", content: prompt }],
+//             max_tokens: 100,
+//         });
+
+//         // Extract the suggested titles from OpenAI's response
+//         let suggestedTitles = [];
+//         try {
+//             // Try to parse JSON array from the response
+//             suggestedTitles = JSON.parse(completion.choices[0].message.content);
+//         } catch (e) {
+//             // Fallback: extract titles from plain text
+//             suggestedTitles = completion.choices[0].message.content
+//                 .split('\n')
+//                 .map(line => line.replace(/^\d+\.\s*/, '').trim())
+//                 .filter(Boolean);
+//         }
+
+//         return res.json({ error: false, suggestedNotes: suggestedTitles });
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({ error: true, message: "Internal Server Error" });
+//     }
+// });
+// app.post('/api/suggest-priority-notes', authenticateToken, async (req, res) => {
+//     try {
+//         const { notes } = req.body; // Expects array of note objects
+//         console.log(notes);
+//         if (!Array.isArray(notes) || notes.length === 0) {
+//             return res.status(400).json({ error: true, message: "No notes provided" });
+//         }
+
+//         // Format notes for OpenAI prompt
+//         const notesForPrompt = notes.map(note => ({
+//             title: note.title,
+//             priority: note.priority || 3, // Default to medium priority
+//             dueDate: note.dueDate || 'No deadline',
+//             content: note.content
+//         }));
+
+//         const response = await openai.chat.completions.create({
+//             model: "deepseek/deepseek-r1-0528-qwen3-8b:free",
+//             messages: [
+//                 {
+//                     role: "system",
+//                     content: `You are an intelligent productivity assistant 
+//                             that schedules tasks optimally based on: 
+//                             1. Current time (e.g., if it is 9 PM and the user sleeps at 11 PM, only 1–2 tasks fit)
+//                             2. Task Priority (3 = highest priority, 1 = lowest)
+//                             3. Due dates (urgent tasks first)
+//                             4. Estimated time to complete (realistic time blocking)
+//                             5. Task variety (avoid stacking similar subjects/concentration-heavy tasks consecutively)
+//                             6. Breaks (assume 5 to 15 min breaks every 1 to 2 hours, 30 to 60 min for meals)`
+//                 },
+//                 {
+//                     role: "user",
+//                     content: `Suggest which tasks I should do on which day. I would like deterministic output. 
+//                     Use a sorting algorithm (e.g., prioritize due dates first, then priority, then shuffle similar 
+//                     tasks for variety). Return only the titles in a JSON array, grouped by the day it should be done: ${JSON.stringify(notesForPrompt)}`
+//                 }
+//             ],
+//             temperature: 0.3,
+//             response_format: { type: "json_object" }
+//         });
+
+//         const suggestions = JSON.parse(response.choices[0].message.content);
+//         console.log(suggestions)
+//         res.json({ suggestedNotes: suggestions });
+
+//     } catch (error) {
+//         console.error("OpenAI error:", error);
+//         res.status(500).json({ error: "Failed to get suggestions" });
+//     }
+// });
