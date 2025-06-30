@@ -29,8 +29,8 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
         navigate("/dashboard");
     }
 
-    const onJournal = () => { 
-        navigate("/journal");
+    const onWellness = () => { 
+        navigate("/wellness");
     }
 
     const onFriends = () => { 
@@ -69,7 +69,7 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
     </div>
 
     {/* Search bar - takes available space on medium+ screens */}
-    <div className="w-full md:w-auto md:flex-1 flex items-center justify-center md:px-4 mb-3 md:mb-0">
+    {/* <div className="w-full md:w-auto md:flex-1 flex items-center justify-center md:px-4 mb-3 md:mb-0">
       <SearchBar
         value={searchQuery}
         onChange={({ target }) => setSearchQuery(target.value)}
@@ -78,7 +78,7 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
         onKeyDown={onKeyDown}
         text="Search Tasks"
       />
-    </div>
+    </div> */}
 
     {/* Profile section - right-aligned */}
     <div className="flex-shrink-0 mr-5">
@@ -86,12 +86,12 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
         userInfo={userInfo}
         onLogout={onLogout}
         onProfile={onProfile}
-        onFriends={onFriends}
-        onJournal={onJournal}
+        //onFriends={onFriends}
+        onWellness={onWellness}
         onStudy={onStudy}
         onTasks={onTasks}
-        isFriends={location.pathname === "/friends"}
-        isJournal={location.pathname === "/journal"}
+        //isFriends={location.pathname === "/friends"}
+        isWellness={location.pathname === "/wellness"}
         isStudy={location.pathname === "/study"}
         isTasks={location.pathname === "/dashboard"}
       />

@@ -244,16 +244,24 @@ const Friends = () => {
         handleClearSearch(); 
     }
 
+    const renderUser = (user) => { 
+        return (
+        <>
+        <div className="w-12 h-12 flex items-center justify-center rounded-full text-white font-medium bg-yellow-700 hover:bg-dark hover:text-white">
+            {getInitials(user?.fullName)}
+        </div>
+        <div className="text-sm my-2">
+            {user?.fullName}
+        </div>
+        </>
+        )
+    }
+
     const renderFriendsList = (users) => (
-    <div className="mt-5 flex flex-row gap-3 justify-center items-center">
+    <div className="mt-5 flex flex-row gap-3 justify-center items-center overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
         {users.map(user => (
         <button className="flex flex-col justify-center items-center" key={user._id}>
-            <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-green hover:bg-red">
-            {getInitials(user?.fullName)}
-            </div>
-            <div className="text-sm my-2">
-            {user?.fullName}
-            </div>
+            {renderUser(user)}
         </button>
         ))}
     </div>
@@ -267,12 +275,7 @@ const Friends = () => {
         <div className="bg-yellow-100 border rounded-lg shadow-md z-10 mt-1 w-full max-w-md">
             {users.map(user => (
                 <div key={user._id} className="flex items-center justify-between p-3 hover:bg-gray-50 border-b last:border-b-0">
-                    <div className="flex items-center">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-500 text-white font-medium mr-3">
-                            {getInitials(user?.fullName)}
-                        </div>
-                        <span className="font-medium">{user.fullName}</span>
-                    </div>
+                    {renderUser(user)}
                     <button 
                         className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition-colors"
                         onClick={() => sendFriendRequest(userInfo._id, user._id)}
@@ -306,15 +309,10 @@ const Friends = () => {
     //People that wanna be friends with you
     const renderIncomingPendingList = (users) => {
         return (
-            <div className="mt-5 flex flex-row gap-3 justify-center items-center">
+            <div className="mt-5 flex flex-row gap-3 justify-center items-center overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                 {users.map(user => (
                     <button className = "flex flex-col justify-center items-center">
-                        <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-green hover:bg-red"> 
-                            {getInitials(user?.fullName)} 
-                        </div> 
-                        <div className="text-sm my-2">
-                            {user?.fullName}
-                        </div> 
+                        {renderUser(user)}
                         <div className="flex flex-row gap-1"> 
                             <button className = "text-center border border-2 rounded-full p-1 hover:text-green" onClick={() => acceptFriendRequest(user)}> 
                                 <AiOutlineCheck/>
@@ -333,15 +331,10 @@ const Friends = () => {
     //Friend Requests that you sent
     const renderSentPendingList = (users) => {
         return (
-            <div className="mt-5 flex flex-row gap-3 justify-center items-center">
+            <div className="mt-5 flex flex-row gap-3 justify-center items-center overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                 {users.map(user => (
                     <button className = "flex flex-col justify-center items-center">
-                        <div className="w-12 h-12 flex items-center justify-center rounded-full text-slate-950 font-medium bg-green hover:bg-red"> 
-                            {getInitials(user?.fullName)} 
-                        </div> 
-                        <div className="text-sm my-2">
-                            {user?.fullName}
-                        </div> 
+                        {renderUser(user)}
                         <div className="flex flex-row gap-1"> 
                             <button className = "text-center border border-2 rounded-full p-1 hover:text-red" onClick={() => deleteFriendRequest(user)}> 
                                 <RxCross2/>
@@ -352,9 +345,6 @@ const Friends = () => {
             </div>
         );
     }
-
-    
-
 
     const handleCloseToast = () => { 
         setShowToastMsg({
@@ -372,13 +362,13 @@ const Friends = () => {
     };
 
         return (
-        <div className="min-h-screen bg-gray-50">
-            <Navbarv3 userInfo={userInfo} />
+        <div className="">
             
-            <div className="container mx-auto px-4 py-8">
+            
+            <div className="container mx-auto p-8">
                 {/* Main Content */}
                 <div className="flex flex-col lg:flex-row gap-6">
-                    <div className="flex flex-col lg:w-1/3 gap-3"> 
+                    <div className="flex flex-col lg:w-1/2 gap-3"> 
                         {/* Friend Requests Section */}
                         <div className="bg-white rounded-xl p-6 shadow-lg">
                             <h2 className="text-xl font-bold mb-2">Friend Requests</h2>
@@ -411,39 +401,20 @@ const Friends = () => {
                     </div> 
                     
                     {/* Friends List Section */}
-                    <div className="lg:w-1/3 bg-white rounded-xl p-6 shadow-lg">
-                                <h2 className="text-xl font-bold text-gray-800">Your Study Buddies</h2>
-                                <p className="text-sm text-gray-500">Once a buddy always a buddy </p>
-
-                                <div>
-                                {allFriends.length > 0 ? (
-                                    renderFriendsList(allFriends)
-                                ) : (
-                                    <div className="text-center py-10">
-                                        <p className="text-gray-500">You don't have any friends yet</p>
-                                        {/* <button 
-                                            className="mt-4 px-4 py-2 bg-blue text-white rounded-full hover:bg-darkgreen transition-colors"
-                                            onClick={() => document.querySelector('input[type="search"]').focus()}
-                                        >
-                                            Find Friends
-                                        </button> */}
-                                    </div>
-                                )}
-                            </div>
-                    </div> 
-
-                    <div className="lg:w-1/3 bg-white rounded-xl p-6 shadow-lg">
+                    <div className="lg:w-1/2 bg-white rounded-xl p-6 shadow-lg flex flex-col">
+                        <h2 className="text-xl font-bold text-gray-800 mb-2 ">Your Study Buddies</h2>
+                        <p className="text-sm text-gray-500 mb-2 ">Once a buddy always a buddy </p>
                         <div className="w-full max-w-md">
-                            <SearchBarv2 
-                                value={searchQuery}
-                                onChange={({target}) => setSearchQuery(target.value)}
-                                onClearSearch={onClearSearch}
-                                onKeyDown={onKeyDown}
-                                text="Find Friends"
-                            />
-                        </div>
-                       
-                        
+                        <SearchBarv2 
+                            value={searchQuery}
+                            onChange={({target}) => setSearchQuery(target.value)}
+                            onClearSearch={onClearSearch}
+                            onKeyDown={onKeyDown}
+                            text="Add buddies"
+                        />
+                        </div> 
+
+                        <div> 
                         {isSearch ? (
                             <div className="mt-4">
                                 {allPeople.length > 0 ? (
@@ -455,12 +426,32 @@ const Friends = () => {
                                 )}
                             </div>
                         ) : (<></>)}
+                        </div> 
+               
                             
-                        
-                    </div>
 
-                </div>
-            </div>
+                        <div> 
+                        {allFriends.length > 0 ? (
+                            renderFriendsList(allFriends)
+                        ) : (
+                            <div className="text-center py-10">
+                                <p className="text-gray-500">You don't have any friends yet</p>
+                                {/* <button 
+                                    className="mt-4 px-4 py-2 bg-blue text-white rounded-full hover:bg-darkgreen transition-colors"
+                                    onClick={() => document.querySelector('input[type="search"]').focus()}
+                                >
+                                    Find Friends
+                                </button> */}
+                            </div>
+                        )}
+
+                        
+                        </div> 
+                    </div> 
+                </div> 
+            </div> 
+
+            
 
             <Toast
                 isShown={showToastMsg.isShown}
@@ -473,6 +464,36 @@ const Friends = () => {
 }
 
 export default Friends
+{/* 
+<div className="lg:w-1/3 bg-white rounded-xl p-6 shadow-lg">
+                <div className="w-full max-w-md">
+                    <SearchBarv2 
+                        value={searchQuery}
+                        onChange={({target}) => setSearchQuery(target.value)}
+                        onClearSearch={onClearSearch}
+                        onKeyDown={onKeyDown}
+                        text="Find Friends"
+                    />
+                </div>
+                
+                
+                {isSearch ? (
+                    <div className="mt-4">
+                        {allPeople.length > 0 ? (
+                            renderSearchResults(allPeople)
+                        ) : (
+                            <div className="bg-yellow rounded-lg p-4 text-center">
+                                No results found for "{searchQuery}"
+                            </div>
+                        )}
+                    </div>
+                ) : (<></>)}
+                            
+                        
+                    </div>
+
+                </div>
+            </div> */}
 
 //     return (
 //     <>
