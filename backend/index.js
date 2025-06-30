@@ -16,6 +16,7 @@ const Friends = require("./models/friends.model");
 const StudyRoom = require("./models/studyroom.model");
 const Mood = require("./models/mood.model");
 const Sleep = require("./models/sleep.model");
+const Study = require("./models/study.model.js");
 
 const express = require("express");
 const cors = require("cors");
@@ -143,6 +144,8 @@ app.post("/add-note", authenticateToken, async (req, res) => {
 
     if (!title) {
         return res.status(400).json({error: true, message: "Title is required"});
+    } else if (isEvent && !dueDate) { 
+        return res.status(400).json({error: true, message: "An event must have a date"});
     }
 
     try { 
@@ -805,7 +808,7 @@ app.get("/get-all-mood/", authenticateToken, async (req, res) => {
 
     try { 
         const moods = await Mood.find({ userId: user._id})
-        .sort({ createdOn: 1});
+        .sort({ createdOn: -1});
 
         return res.json({ error: false, moods, message: "All moods retrieved successfully"})
     } catch (error) { 
@@ -835,6 +838,185 @@ app.delete("/delete-mood/:moodId", authenticateToken, async (req, res) => {
     }
 })
 
+//SLEEP
+app.post("/add-sleep", authenticateToken, async (req, res) => { 
+    console.log(req.body);
+    const { sleepStart, sleepEnd, dreams } = req.body; 
+    const { user } = req.user; 
+
+    //disable the button if already logged a sleep entry
+
+    if (!sleepStart && !sleepEnd) {
+        return res.status(400).json({error: true, message: "Sleep details are required"});
+    } else if (!sleepEnd) { 
+        return res.status(400).json({error: true, message: "Sleep end is required"})
+    } else if (!sleepStart) { 
+        return res.status(400).json({error: true, message: "Sleep start is required"})
+    } 
+
+    const formatedDreams = dreams 
+        ? dreams.trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ') 
+        : null;
+
+    try { 
+        const sleepLog = new Sleep({
+            sleepStart, 
+            sleepEnd, 
+            dreams: formatedDreams || null,
+            userId: user._id,
+        });
+
+        await sleepLog.save(); 
+        console.log("sleep added")
+        return res.json({
+            error: false,
+            sleepLog, 
+            message: "Sleep log added successfully",
+        }) 
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
+
+app.get("/get-this-week-sleep/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const now = new Date();
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Exactly 7 days ago
+
+        const sleeps = await Sleep.find({ 
+            userId: user._id,
+            createdOn: {
+                $gte: oneWeekAgo, // Created in the last 7 days
+                $lte: now // Optional: up to now (if you want to exclude future entries)
+            }
+        }).sort({ createdOn: -1 }); // Newest first
+
+        return res.json({ error: false, sleeps, message: "All sleeps retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+app.get("/get-all-sleep/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const sleeps = await Sleep.find({ userId: user._id})
+        .sort({ createdOn: -1});
+
+        return res.json({ error: false, sleeps, message: "All sleeps retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+app.delete("/delete-sleep/:sleepId", authenticateToken, async (req, res) => { 
+    const sleepId = req.params.sleepId;
+    const { user } = req.user;
+
+    try { 
+        const sleep = await Sleep.findOne({ _id: sleepId });
+
+        if (!sleep) { 
+            return res.status(404).json({ error: true, message: "Sleep not found" })
+        }
+        
+        await Sleep.deleteOne({ _id: sleepId });
+
+        return res.json({ error: false, message: "Sleep deleted successfully" })
+    } catch (error) { 
+        return res.status(500).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
+    }
+})
+
+//STUDY
+app.post("/add-study-session", authenticateToken, async (req, res) => { 
+    console.log(req.body);
+    const { studyStart, studyEnd, elapsedTime, 
+            completedTasks, studyRoom } = req.body; 
+    const { user } = req.user; 
+
+    const formatTasks = (completedTasks) => { 
+        if (!Array.isArray(completedTasks)) return [];
+        return completedTasks.map((task) => ({
+            ...task,
+            whenDone: Date.now(),
+        }));
+    }
+
+    try { 
+        console.log("HERE4");
+        const formattedTasks = formatTasks(completedTasks);
+        console.log(studyStart, studyEnd, elapsedTime, completedTasks, studyRoom, user._id);
+        const studyLog = new Study({
+            studyStart, 
+            studyEnd,
+            elapsedTime,
+            completedTasks: formattedTasks,
+            studyRoom,
+            userId: user._id,
+        });
+        console.log(studyLog); 
+
+        await studyLog.save(); 
+        
+        return res.json({
+            error: false,
+            studyLog, 
+            message: "Study log added successfully",
+        }) 
+    } catch (error) { 
+        console.log(error.message); 
+        return res.status(500).json({ 
+            error: true, 
+            message: error.message || "Internal Server Error"
+        })
+    }
+})
+
+app.get("/get-all-study-time/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        
+        const studies = await Study.find({ userId: user._id}).exec();
+        console.log(studies);
+        const seconds = studies.reduce((sum, studySession) => 
+            sum + studySession.elapsedTime, 
+            0
+        )
+
+        const hours = Math.floor(seconds/3600); 
+        const mins = Math.floor((seconds%3600) / 60);
+        console.log("SECONDS"+seconds); 
+        return res.json({ error: false, total:`${hours}h ${mins}m`, message: "All studies retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
+app.get("/get-today-study-time", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const total = 0;
+        const studies = await Study.find({ userId: user._id, createdOn: new Date().getTime() })
+        .map((studySession) => { 
+            total += studySession.elapsedTime;
+        })
+        return res.json({ error: false, total, message: "All studies retrieved successfully"}); 
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error"});
+    }
+})
 
 app.listen(8000);
 module.exports = app;
