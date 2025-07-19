@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const sleepSchema = new Schema({
-    sleepStart: { type: String, required: true},
-    sleepEnd: { type: String, required: true},
+    sleepStart: { type: Date, required: true},
+    sleepEnd: { type: Date, required: true},
     dreams: { type: String },
 
     userId: { type: String , required: true},
