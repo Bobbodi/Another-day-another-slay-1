@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
     "./public/index.html"
@@ -14,7 +14,7 @@ export default {
         blue: 'oklch(59.23% 0.112 227.97)',
         dark: 'oklch(32.91% 0.059 225.83)',
         
-        // Semantic names
+        // Optional: Create semantic names
         primary: 'oklch(59.23% 0.112 227.97)', // blue
         secondary: 'oklch(77.75% 0.160 166.57)', // green
         accent: 'oklch(64.76% 0.204 11.07)', // red
@@ -23,6 +23,7 @@ export default {
     },
   },
   plugins: [
-    import('@tailwindcss/forms'), // Changed from require() to import()
+    require('@tailwindcss/forms'), // Optional plugin for better form styles
+    // Other plugins you might want
   ],
 }
