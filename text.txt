@@ -1,1 +1,100 @@
 asdasd
+    const Steve = () => {
+      const dogRef = useRef();
+
+      return (
+        <group ref={dogRef} position={[5, 2, 4]} rotation={[0, 0.5, 0]}>
+          <SteveModel scale={[0.15, 0.15, 0.15]} />
+        </group>
+      );
+    };
+
+    const Creeper = () => {
+      const cowRef = useRef();
+
+      return (
+        <group ref={cowRef} position={[5, 2, 0]} rotation={[0, 0.5, 0]}>
+          <CreeperModel scale={[0.15, 0.15, 0.15]} />
+        </group>
+      );
+    };
+
+    const Bee = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[3, 8, 0]} rotation={[0, -2.5, 0]}>
+          <BeeModel scale={[0.3, 0.3, 0.3]}/>
+        </group>
+      );
+    };
+
+    const Camel = () => {
+      const camRef = useRef();
+
+      return (
+        <group ref={camRef} position={[7, 0, -2]} rotation={[0, -2.4, 0]}>
+          <CamelModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+    const Centaur = () => {
+      const cenRef = useRef();
+
+      return (
+        <group ref={cenRef} position={[-4, 0, 6]} rotation={[0, -2.5, 0]}>
+          <CentaurModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+    const Cow = () => {
+      const cowRef = useRef();
+
+      return (
+        <group ref={cowRef} position={[1, 0, 5]} rotation={[0, 1.5, 0]}>
+          <CowModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+    const Monster = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[0, 0.2, 0]} rotation={[0, -2.5, 0]}>
+          <MonsterModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+    const Pigman = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[-4, 7, 0]} rotation={[0, -2.5, 0]}>
+          <PigmanModel scale={[1, 1, 1]} />
+        </group>
+      );
+    };
+
+    const RainbowDragon = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[0, 8, 0]} rotation={[0, -2.5, 0]}>
+          <RainbowDragonModel scale={[1, 1, 1]} />
+        </group>
+      );
+    };
+
+    const Shark = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[-3, 0, 8]} rotation={[0, -2.5, 0]}>
+          <SharkModel scale={[0.3, 0.3, 0.3]} />
+        </group>
+      );
+    };
