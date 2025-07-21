@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import ProfileInfo from "./cards/ProfileInfo";
+import { BiHelpCircle } from "react-icons/bi";
 
 const Navbar = ({userInfo}) => {
     
@@ -33,10 +34,13 @@ const Navbar = ({userInfo}) => {
     }
 
     return ( 
-    <div className="w-full bg-yellow-400 flex flex-col md:flex-row items-center justify-between px-4 py-3 shadow-md sticky top-0 z-50">
+    <div className="w-full h-[90px] bg-yellow-400 flex flex-col md:flex-row items-center justify-between px-4 py-3 shadow-md sticky top-0 z-50">
         {/* Logo - always visible */}
         <div className="flex-shrink-0 mb-3 md:mb-0">
-        <h2 className="text-2xl font-medium text-black">SlayFocus</h2>
+        <div className="flex flex-row items-center gap-2 mb-3 md:mb-0">
+            <h2 className="text-2xl font-medium text-black">SlayFocus</h2>
+            <BiHelpCircle className="text-2xl text-black cursor-pointer hover:text-dark" onClick={() => navigate("/about")} />
+        </div>
         </div>
             <div className="flex-shrink-0 mr-5"> 
                 <ProfileInfo 
@@ -51,6 +55,7 @@ const Navbar = ({userInfo}) => {
                     isWellness={location.pathname === "/wellness"}
                     isStudy={location.pathname === "/study"}
                     isTasks={location.pathname === "/dashboard"}
+                    isProfile={location.pathname === "/profile" || location.pathname === "/profile/studyroom" || location.pathname === "/profile/avatar"}
                     />
             </div>
 

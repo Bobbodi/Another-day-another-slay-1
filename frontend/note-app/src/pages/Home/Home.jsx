@@ -14,7 +14,8 @@ import { MdAdd } from "react-icons/md";
 import { RiExpandDiagonalLine } from "react-icons/ri";
 import Calendar from "../../components/Calender/Calender";
 import SeeAllSuggested from "./SeeAllSuggested";
-import { getRelativeDate } from "../../utils/helper.js"
+import { getRelativeDate, getSuggestions } from "../../utils/helper.js"
+import { EMOJIS } from "../../utils/constants.js";
 
 
 const Home = () => {
@@ -44,7 +45,11 @@ const Home = () => {
     const [error, setError] = useState(null);
     const [suggestedNotes, setSuggestedNotes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    //used when i was doing deepseek api const [newDay, setNewDay] = useState(false);
+    const [avgStartSleep, setAvgStartSleep] = useState(23);
+    const [avgEndSleep, setAvgEndSleep] = useState(9);
+    const [productivity, setProductivity] = useState(8);
+
+    const [searchNotes, setSearchNotes] = useState([]);
 
     //for calendar
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -103,6 +108,7 @@ const Home = () => {
     }
 
 
+
     //delete Notes
     const deleteNote = async (data) => {
       const noteId = data._id;
@@ -128,18 +134,19 @@ const Home = () => {
     const onSearchNote = async (query) => { 
         if (!query || query.trim() === "") {
             setIsSearch(false);
-            getAllNotes();
+            callGetSuggestions();
             return;
         }
         try { 
             const response = await axiosInstance.get('/search-notes', {
                 params: { query },
             })
-
+            console.log(response);
             if (response.data && response.data.notes) { 
                 setIsSearch(true); 
-                setAllNotes(response.data.notes);
+                setSearchNotes(response.data.notes);
             }
+            console.log(suggestedNotes);
         } catch (error) { 
             console.log(error);
         }
@@ -173,57 +180,79 @@ const Home = () => {
         getAllNotes(); 
     }
 
-    useEffect(() => { 
-        getAllNotes();
-        getUserInfo(); 
-    }, [])
+    useEffect(() => {
+    const fetchData = async () => {
+        await getUserInfo();      // Wait for user data
+        await getAllNotes();     // Wait for notes
+        await getAllSleep();    // Wait for sleep data
+        await getAllMood();     // Wait for mood data
+        
+    };
+    fetchData();
+    }, []);
 
     useEffect(() => {
-        // Only run if allNotes has loaded and is not empty and Is New Day
         if (allNotes.length > 0) {
-            getSuggestions();
+            callGetSuggestions();
         }
-    }, [allNotes]);
-    
-    
-    //AI suggested tasks 
-    const getSuggestions = async () => {
-        setIsLoading(true);
-        try {
-            const tasks = allNotes.filter(note => !note.isDone);
-            const response = await axiosInstance.post('/api/suggest-priority-notes', { tasks:  tasks });
-                // notes: incompleteNotes.map(note => ({
-                //     title: note.title,
-                //     priority: note.priority,
-                //     dueDate: note.dueDate,
-                //     content: note.content
-                // }))
-                
-            //});
-    
-            
-            if (response.data.result) {
-                // set the full note objects for the suggested titles
-                setSuggestedNotes(response.data.result);
-            }
-        } catch (error) {
-            console.error("Error getting suggestions:", error);
-        } finally { 
-            setIsLoading(false);
+    }, [allNotes]);  // Runs when `allNotes` changes
+
+    const callGetSuggestions = () => { 
+        //console.log("allNotes filtered at callGetSuggestionsatHome: ", allNotes.filter(note => !note.isDone));
+        setSuggestedNotes(getSuggestions(allNotes.filter(note => !note.isDone), avgStartSleep, avgEndSleep, productivity));
+        //console.log("callGetSuggestions at HOME Suggested Notes: ", suggestedNotes);
+    }
+
+    const getAllSleep = async () => { 
+      try { 
+        const response = await axiosInstance.get("/get-all-sleep");
+        if (response.data && response.data.sleeps) { 
+          const sleepData = response.data.sleeps; 
+          if (sleepData.length > 0) {
+            const numRecords = sleepData.length > 0 ? sleepData.length : 1;
+            setAvgStartSleep(sleepData.reduce((total, record) => { 
+              const sleepStart = new Date(record.sleepStart).getHours();
+              return total + sleepStart; 
+            }, 0) / numRecords); 
+            setAvgEndSleep(sleepData.reduce((total, record) => { 
+              const sleepEnd = new Date(record.sleepEnd).getHours();
+              return total + sleepEnd; 
+            }, 0) / numRecords); 
+          } else {
+            setAvgStartSleep(23); // Default value if no records  
+            setAvgEndSleep(9); // Default value if no records
+          }
         }
-    };
+      } catch (error) { 
+          console.log("beep boop error time", error); 
+      }
+    }
 
-
+    const getAllMood = async () => { 
+      try { 
+          const response = await axiosInstance.get("/get-all-mood");
+          if (response.data && response.data.moods) { 
+              const moodData = response.data.moods; 
+              setProductivity(moodData.reduce((total, record) => {
+                const moodEmoji = record.mood; 
+                const moodScore = EMOJIS[moodEmoji]?.score || 0; 
+                return total + moodScore
+              }, 0) / moodData.length);
+          }
+      } catch (error) { 
+          console.log("beep boop error time", error)
+      }
+    }
     return (
     <>
         <Navbar userInfo={userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch} />
 
-        <div className="min-h-screen bg-gray-50">
-            <div className="container gap-4 mx-auto px-4 py-8 flex flex-col lg:flex-row justify-center">
+        <div className="bg-gray-50">
+            <div className="container mt-4 gap-4 px-0 py-0 flex flex-col lg:flex-row justify-center">
 
                 {/* Main Content Area */}
 
-                <div className="flex justify-center items-center w-full lg:w-[40%] rounded-xl shadow-lg p-6 mb-6">
+                <div className="flex justify-center items-center w-full lg:w-[40%] rounded-xl shadow-lg p-6">
                     {/* Today's suggested tasks section */}
                     {/*<h1 className="text-2xl font-bold text-gray-800 mb-6">Calender</h1>*/}
                     {/* Show loading page while fetching data */}
@@ -236,12 +265,18 @@ const Home = () => {
                 
 
                 
-            <div className="max-h-100 w-full lg:w-[40%] rounded-xl shadow-lg p-6 mb-6">
+            <div className="max-h-100 w-full lg:w-[40%] rounded-xl shadow-lg p-6">
             {/* Tasks Section Header */}
             <div className="flex flex-row justify-between items-center mb-3">
-                <p className="text-2xl font-bold text-gray-800">
-                {getRelativeDate(selectedDate)}
-                </p>
+                {
+                    isSearch && searchNotes ? (
+                        <p className="text-2xl font-bold text-blue-500">Search Results</p>
+                    ) : (
+                        <p className="text-2xl font-bold text-gray-800">
+                            {getRelativeDate(selectedDate)}
+                        </p>
+                    )
+                }
                 {/* See all Button - now properly contained */}
                 <div className="relative">
                 <button
@@ -263,36 +298,38 @@ const Home = () => {
             {/* Combined notes container with proper scrolling */}
             <div className="mt-3 space-y-3 overflow-y-auto max-h-[calc(100vh-300px)]" style={{ scrollbarWidth: 'thin' }}>
                 {/* Completed notes for selected day */}
-                {selectedDate && allDoneNotes
-                .filter((task) => {
-                    const noteDate = new Date(task.whenDone).toDateString();
-                    const selectedDateStr = new Date(selectedDate).toDateString();
-                    return noteDate === selectedDateStr;
-                })
-                .map((task) => (
-                    <div key={task._id} className="h-full">
-                    <NoteCard 
-                        title={task.title}
-                        date={task.createdOn}
-                        content={task.content}
-                        priority={task.priority}
-                        dueDate={task.dueDate}
-                        tags={task.tags}
-                        isDone={task.isDone}
-                        isEvent={task.isEvent}
-                        onEdit={() => handleEdit(task)}
-                        onDelete={() => deleteNote(task)}
-                        onDoneNote={() => updateIsDone(task)}
-                        hovered={hoveredNoteId === task._id}
-                        onMouseEnter={() => setHoveredNoteId(task._id)}
-                        onMouseLeave={() => setHoveredNoteId(null)}
-                    />
-                    </div>
-                ))
-                }
-
+                {isSearch && (
+                searchNotes.length > 0 ? (
+                    <>
+                    
+                    {searchNotes.map((task) => (
+                        <div key={task._id} className="h-full">
+                        <NoteCard 
+                            title={task.title}
+                            date={task.createdOn}
+                            content={task.content}
+                            priority={task.priority}
+                            dueDate={task.dueDate}
+                            tags={task.tags}
+                            isDone={task.isDone}
+                            isEvent={task.isEvent}
+                            onEdit={() => handleEdit(task)}
+                            onDelete={() => deleteNote(task)}
+                            onDoneNote={() => updateIsDone(task)}
+                            hovered={hoveredNoteId === task._id}
+                            onMouseEnter={() => setHoveredNoteId(task._id)}
+                            onMouseLeave={() => setHoveredNoteId(null)}
+                        />
+                        </div>
+                    ))}
+                    </>
+                ) : (
+                    <p className="text-lg text-gray-500 mt-4">No notes found matching your search</p>
+                )
+                )}
+                
                 {/* Tasks due on selected day */}
-                {Object.entries(suggestedNotes)
+                {!isSearch && Object.entries(suggestedNotes)
                 .filter(([dateString]) => {
                     if (!selectedDate) return true;
                     const noteDate = new Date(dateString).toDateString();
@@ -322,6 +359,35 @@ const Home = () => {
                     ))
                 ))
                 }
+
+                {!isSearch && selectedDate && allDoneNotes
+                .filter((task) => {
+                    const noteDate = new Date(task.whenDone).toDateString();
+                    const selectedDateStr = new Date(selectedDate).toDateString();
+                    return noteDate === selectedDateStr;
+                })
+                .map((task) => (
+                    <div key={task._id} className="h-full">
+                    <NoteCard 
+                        title={task.title}
+                        date={task.createdOn}
+                        content={task.content}
+                        priority={task.priority}
+                        dueDate={task.dueDate}
+                        tags={task.tags}
+                        isDone={task.isDone}
+                        isEvent={task.isEvent}
+                        onEdit={() => handleEdit(task)}
+                        onDelete={() => deleteNote(task)}
+                        onDoneNote={() => updateIsDone(task)}
+                        hovered={hoveredNoteId === task._id}
+                        onMouseEnter={() => setHoveredNoteId(task._id)}
+                        onMouseLeave={() => setHoveredNoteId(null)}
+                    />
+                    </div>
+                ))
+                }
+
             </div>
             </div> 
         
@@ -368,7 +434,6 @@ const Home = () => {
             <SeeAllSuggested
                 type={openAllSuggestedModal.type}
                 nodeData={openAllSuggestedModal.data}
-                getSuggestions={getSuggestions}
                 onClose={() => { 
                     setAllSuggestedModal({ isShown:false, type:"see", data:null});
                 }}

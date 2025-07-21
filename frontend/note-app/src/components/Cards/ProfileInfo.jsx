@@ -5,8 +5,9 @@ import { FaBookOpenReader } from "react-icons/fa6";
 import { BiBookHeart } from "react-icons/bi";
 import { PiStudentBold } from "react-icons/pi";
 import { BsFillJournalBookmarkFill } from "react-icons/bs";
+import { BiHelpCircle } from "react-icons/bi";
 
-const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTasks, isWellness, isTasks, isStudy }) => {
+const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTasks, isWellness, isTasks, isStudy, isProfile }) => {
   
   const TabItem = ({ icon: Icon, label, isActive, onClick }) => (
   <div 
@@ -57,18 +58,12 @@ const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTas
   return (
     <div className="flex items-center gap-6">
       <div className="flex items-center gap-3">
+
         <TabItem 
           icon={FaTasks} 
           label="Tasks" 
           isActive={isTasks} 
           onClick={onTasks} 
-        />
-        
-        <TabItem 
-          icon={BiBookHeart} 
-          label="Wellness" 
-          isActive={isWellness} 
-          onClick={onWellness} 
         />
         
         {/* <TabItem 
@@ -84,6 +79,15 @@ const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTas
           isActive={isStudy} 
           onClick={onStudy} 
         />
+
+        <TabItem 
+          icon={BiBookHeart} 
+          label="Wellness" 
+          isActive={isWellness} 
+          onClick={onWellness} 
+        />
+
+        
       </div>
 
       <div className="flex items-center gap-4 ml-auto">
@@ -91,7 +95,12 @@ const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTas
           onClick={onProfile}
           className="relative group"
         >
-          <div className="w-12 h-12 flex items-center justify-center rounded-full text-white font-medium bg-yellow-700 hover:bg-dark transition-colors duration-200">
+          <div className={`w-12 h-12 flex items-center justify-center rounded-full text-white font-medium transition-colors duration-200
+          ${
+            isProfile 
+            ? 'bg-dark'
+            : 'bg-yellow-700 hover:bg-dark'
+          }`}>
             {getInitials(userInfo?.fullName)}
           </div>
           <div className="absolute top-full mt-2 hidden group-hover:block bg-dark text-white text-xs py-1 px-2 rounded whitespace-nowrap">

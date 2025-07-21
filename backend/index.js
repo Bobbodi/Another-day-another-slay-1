@@ -13,7 +13,6 @@ const User = require("./models/user.model");
 const Note = require("./models/note.model");
 const Journal = require("./models/journal.model");
 const Friends = require("./models/friends.model");
-const StudyRoom = require("./models/studyroom.model");
 const Mood = require("./models/mood.model");
 const Sleep = require("./models/sleep.model");
 const Study = require("./models/study.model.js");
@@ -122,20 +121,29 @@ app.post("/login", async (req, res) => {
 })
 
 app.get("/get-user", authenticateToken, async (req, res) => { 
-    const { user } = req.user; 
-    const isUser = await User.findOne({ _id: user._id }); 
+    try { 
+        const { user } = req.user; 
+        const isUser = await User.findOne({ _id: user._id }); 
 
-    if (!isUser) { 
-        return res.sendStatus(401);
+        if (!isUser) { 
+            return res.sendStatus(401);
+        }
+        
+        return res.json({ user: {
+            fullName: isUser.fullName,
+            email: isUser.email, 
+            "_id": isUser._id, 
+            avatar: isUser.avatar,
+            studyroom: isUser.studyroom,
+            createdOn: isUser.createdOn
+        }, 
+            message: "" })
+    } catch (error) { 
+        return res.status(401).json({ 
+            error: true, 
+            message: "Internal Server Error"
+        })
     }
-    
-    return res.json({ user: {
-        fullName: isUser.fullName,
-        email: isUser.email, 
-        "_id": isUser._id, 
-        createdOn: isUser.createdOn
-    }, 
-        message: "" })
 })
 
 app.post("/add-note", authenticateToken, async (req, res) => { 
@@ -285,9 +293,9 @@ app.get("/search-notes/", authenticateToken, async (req, res) => {
                 {content: {$regex: new RegExp(query, "i")}},
                 {tags: {$regex: new RegExp(query, "i")}},
             ],
-        })
+        }).sort({ isDone: 1});
         return res.json({ error: false, 
-            notes: matchingNotes, 
+            notes: matchingNotes,
             message: "Notes found"
         })
     } catch (error) {
@@ -494,6 +502,58 @@ app.get("/get-all-friends/", authenticateToken, async (req, res) => {
     }
 })
 
+//friendships where status = 2 (already friends) -- for STUDY page to show me and my friends' avatar studying 
+app.get("/get-all-friends-avatar/", authenticateToken, async (req, res) => { 
+    const { user } = req.user; 
+
+    try { 
+        const friendships = await Friends.find({
+            $or: [
+                { person1: user._id },
+                { person2: user._id }
+            ],
+            status: 2,
+        })
+
+        // Get all unique friend IDs (excluding the current user)
+        const friendIds = friendships.map(f => 
+            f.person1.toString() === user._id.toString() ? f.person2 : f.person1
+        );
+
+        // Get user details for these friends
+        const friends = await User.find(
+            { _id: { $in: friendIds } },
+            { fullName: 1, avatar: 1 } // Only return name field
+        ).lean();
+
+        const me = await User.findById(
+            user._id, 
+            { fullName: 1, avatar: 1}
+        ).lean(); //fetch my own details and append to result 
+
+        // Attach friendshipId to each friend
+        const result0 = friendships.map(f => ({
+            ...friends.find(friend => 
+                friend._id.toString() === 
+                (f.person1.toString() === user._id.toString() ? f.person2 : f.person1).toString()
+            ),
+            friendshipId: f._id
+        }));
+
+        console.log(result0);
+
+        const result = [
+            { ...me, friendshipId: null}, //add my details also 
+            ...result0
+        ]
+        
+
+        return res.json({ error: false, friends: result, message: "All friends' name retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
 //friendships where status = 1 (pending friend req)
 app.get("/get-friend-requests/", authenticateToken, async (req, res) => { 
     const { user } = req.user; 
@@ -606,171 +666,6 @@ app.get("/get-all-users/", authenticateToken, async (req, res) => {
         return res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 })
-
-//STUDY ROOM 
-app.get("/get-all-studyroom/", authenticateToken, async (req, res) => { 
-    const { user } = req.user; 
-
-    try { 
-        const studyRoom = await StudyRoom.find({ owner: user._id})
-        .sort({ createdOn: -1});
-
-        return res.json({ error: false, studyRoom, message: "All study rooms retrieved successfully"})
-    } catch (error) { 
-        return res.status(500).json({ error: true, message: "Internal Server Error" });
-    }
-})
-
-app.delete("/delete-note/:studyroomId", authenticateToken, async (req, res) => { 
-    const studyroomId = req.params.studyroomId;
-    //const { user } = req.user;
-
-    try { 
-        const studyRoom = await StudyRoom.findOne({ _id: studyroomId });
-
-        if (!studyRoom) { 
-            return res.status(404).json({ error: true, message: "Study Room not found" })
-        }
-        
-        await StudyRoom.deleteOne({ _id: studyroomId });
-
-        return res.json({ error: false, message: "Study Room deleted successfully" })
-    } catch (error) { 
-        return res.status(500).json({ 
-            error: true, 
-            message: "Internal Server Error"
-        })
-    }
-})
-
-
-//SUGGESTED NOTES
-app.post('/api/suggest-priority-notes', authenticateToken, async (req, res) => {
-    const { tasks } = req.body; 
-    //console.log('Token:', req.headers.authorization);
-    //console.log(tasks);
-    try {
-        
-        const settings = { 
-            wakeTime: 8, 
-            sleepTime: 23,
-            workHours: 4,
-            minBreak: 5, 
-            maxBreak: 15, 
-            mealBreak: 30, 
-            breakInterval: 90,
-        };
-
-        const parseDueDate = (dueDate) => { 
-            if (!dueDate || dueDate === null) return Infinity; 
-            return new Date(dueDate).getTime();
-        };
-
-        const sortedTasks = [...tasks].sort((a, b) => { 
-            const aDue = parseDueDate(a.dueDate);
-            const bDue = parseDueDate(b.dueDate);
-            if (aDue !== bDue) return aDue - bDue; // Sort by due date first
-            if (a.priority !== b.priority) return b.priority - a.priority; // Then by priority
-            return (a.title.length + a.title.charCodeAt(0)) - (b.title.length + b.title.charCodeAt(0)); // hash for deterministic behaviour
-        });
-
-        //console.log("--------------------------SORTED TASKS-----------")
-        //console.log(sortedTasks);
-
-        //Group tasks by day 
-        const dailySchedule = {}
-        //calculate remaining hours
-        const now = new Date();
-        let currentDay = new Date(now); 
-        const currentHour = now.getHours();
-        let remainingTimeToday;
-
-        if (currentHour >= settings.sleepTime) {
-            //outside working hours (sleeping time)
-            remainingTimeToday = 0;
-        } else {
-            //during working hours
-            const workingHoursLeft = settings.sleepTime - currentHour;
-            remainingTimeToday = Math.min(settings.workHours * 60, workingHoursLeft * 60);
-            
-            //account for minutes in the current hour:
-            const currentMinutes = now.getMinutes();
-            remainingTimeToday -= currentMinutes; // subtract minutes already passed in current hour
-            remainingTimeToday = Math.max(0, remainingTimeToday); // ensure it doesn't go negative
-        }
-
-        for (const task of sortedTasks) { 
-            if (task.isEvent) { 
-                //an event 
-                let dayKey = new Date(task.dueDate).toDateString(); 
-                if (!dailySchedule[dayKey]) { 
-                    dailySchedule[dayKey] = [];
-                }
-                dailySchedule[dayKey].push(task); 
-                continue; 
-            }
-
-            const duration = estimateTaskDuration(task);
-
-
-            //no time to finish today, push to next day
-            if (duration > remainingTimeToday) { 
-                currentDay = new Date(currentDay); 
-                currentDay.setDate(currentDay.getDate() + 1); 
-                remainingTimeToday = settings.workHours * 60; 
-            }
-
-            //Add task to current day 
-            dayKey = currentDay.toDateString(); 
-            if (!dailySchedule[dayKey]) { 
-                dailySchedule[dayKey] = [];
-            }
-            dailySchedule[dayKey].push(task); 
-
-            //updateTimeLeft
-            remainingTimeToday -= duration; 
-            //no time left today, set currentDay to tomorrow
-            if (remainingTimeToday <= 0) {
-                currentDay = new Date(currentDay);
-                currentDay.setDate(currentDay.getDate() + 1);
-                remainingTimeToday = settings.workHours * 60;
-            } else { 
-                const workedSinceLastBreak = duration; 
-                if (workedSinceLastBreak >= settings.breakInterval) { 
-                    const breakDuration = Math.min(Math.max(settings.minBreak, 
-                                                            workedSinceLastBreak/10), //in hours
-                                                   settings.maxBreak); 
-                    remainingTimeToday -= breakDuration; 
-                }
-            }
-        }
-
-
-        //console.log(dailySchedule);
-        //return reuslt 
-        const result = {}
-        Object.keys(dailySchedule).forEach(day => { 
-            const date = new Date(day); 
-            result[date] = dailySchedule[day];
-        });
-
-        //console.log("_-------------------------------");
-        //console.log("RESULT_-------------------------")
-        console.log(result);
-        return res.json({ error: false, result, message: "Schedule retrieved successfully"});
-
-    
-
-
-        
-    } catch (error) {
-        console.log(error); 
-        return res.status(500).json({ 
-            error: true, 
-            message: "Internal Server Error"
-        })
-    }
-});
 
 //MOOD
 app.post("/add-mood", authenticateToken, async (req, res) => { 
@@ -907,8 +802,8 @@ app.get("/get-all-sleep/", authenticateToken, async (req, res) => {
 
     try { 
         const sleeps = await Sleep.find({ userId: user._id})
-        .sort({ createdOn: -1});
-
+        .sort({ createdOn: 1});
+        console.log(sleeps);
         return res.json({ error: false, sleeps, message: "All sleeps retrieved successfully"})
     } catch (error) { 
         return res.status(500).json({ error: true, message: "Internal Server Error" });
@@ -982,6 +877,28 @@ app.post("/add-study-session", authenticateToken, async (req, res) => {
     }
 })
 
+app.get("/get-today-study-time", authenticateToken, async (req, res) => {
+    const { user } = req.user; 
+
+    try { 
+        const studies = await Study.find({ userId: user._id}).exec();
+        console.log(studies);
+        const seconds = studies
+            .filter(study => new Date(study.createdOn).getDate() == new Date().getDate())
+            .reduce((sum, studySession) => 
+                sum + studySession.elapsedTime, 
+                0
+        )
+
+        const hours = Math.floor(seconds/3600); 
+        const mins = Math.floor((seconds%3600) / 60);
+        console.log("SECONDS"+seconds); 
+        return res.json({ error: false, total:`${hours}h ${mins}m`, message: "All studies retrieved successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+})
+
 app.get("/get-all-study-time/", authenticateToken, async (req, res) => { 
     const { user } = req.user; 
 
@@ -1018,7 +935,53 @@ app.get("/get-today-study-time", authenticateToken, async (req, res) => {
     }
 })
 
-app.listen(8001);
+//AVATAR 
+app.put("/change-avatar/:userId", authenticateToken, async (req, res) => { 
+    const userId = req.params.userId;
+    const { newAvatar } = req.body || {}; 
+    const { user } = req.user;
+
+    try { 
+        const existingUser = await User.findOne({ _id: userId });
+
+        if (!existingUser) { 
+            return res.status(400).json({error: true, message: "User not found"});
+        }
+        
+        existingUser.avatar = newAvatar || existingUser.avatar;
+
+        await existingUser.save(); 
+
+        return res.json({ error: false, existingUser, message: "Avatar updated successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error"})
+    }
+})
+
+//STUDY ROOM 
+app.put("/change-studyroom/:userId", authenticateToken, async (req, res) => { 
+    const userId = req.params.userId;
+    const { newRoom } = req.body || {}; 
+    const { user } = req.user;
+
+    try { 
+        const existingUser = await User.findOne({ _id: userId });
+
+        if (!existingUser) { 
+            return res.status(400).json({error: true, message: "User not found"});
+        }
+        
+        existingUser.studyroom = newRoom || existingUser.avatar;
+
+        await existingUser.save(); 
+
+        return res.json({ error: false, existingUser, message: "Study Room updated successfully"})
+    } catch (error) { 
+        return res.status(500).json({ error: true, message: "Internal Server Error"})
+    }
+})
+
+app.listen(8000);
 module.exports = app;
 
 
