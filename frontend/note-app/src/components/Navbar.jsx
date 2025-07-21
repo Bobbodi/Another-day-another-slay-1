@@ -63,9 +63,9 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
     }
     
     return (
-  <div className="w-full bg-yellow-400 flex flex-col md:flex-row items-center justify-between px-4 py-3 shadow-md sticky top-0 z-50">
+  <div className="bg-yellow-400 backdrop-blur-sm flex items-center justify-between px-6 py-4 drop-shadow w-screen">
     {/* Logo - always visible */}
-    <div className="flex flex-row items-center gap-2 mb-3 md:mb-0">
+    <div className="flex flex-row items-center gap-2 md:mb-0">
       <h2 className="text-2xl font-medium text-black">SlayFocus</h2>
       <BiHelpCircle className="text-2xl text-black cursor-pointer hover:text-dark" onClick={() => navigate("/about")} />
     </div>

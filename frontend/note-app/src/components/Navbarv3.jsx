@@ -34,7 +34,7 @@ const Navbar = ({userInfo}) => {
     }
 
     return ( 
-    <div className="w-full h-[90px] bg-yellow-400 flex flex-col md:flex-row items-center justify-between px-4 py-3 shadow-md sticky top-0 z-50">
+    <div className="bg-yellow-400 backdrop-blur-sm flex items-center justify-between px-6 py-4 drop-shadow w-screen">
         {/* Logo - always visible */}
         <div className="flex-shrink-0 mb-3 md:mb-0">
         <div className="flex flex-row items-center gap-2 mb-3 md:mb-0">

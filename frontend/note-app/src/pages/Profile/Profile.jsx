@@ -37,6 +37,7 @@ import { AVATAR_DESC } from '../../utils/constants.js';
 //react-three-js
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
+import { HumanModel } from '../../components/3D models/HumanModel.jsx';
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState(null); 
@@ -228,6 +229,12 @@ const Profile = () => {
       "scale": [0.33, 0.33, 0.33]},
     10: {
       "model": CreeperModel,
+      "position": [0, 0, 0], 
+      "rotation": [0, 0.5, 0], 
+      "scale": [0.30, 0.30, 0.30]
+    },
+    11: {
+      "model": HumanModel,
       "position": [0, 0, 0], 
       "rotation": [0, 0.5, 0], 
       "scale": [0.30, 0.30, 0.30]

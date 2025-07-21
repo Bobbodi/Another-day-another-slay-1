@@ -2,6 +2,7 @@ import { React, useState, useEffect, useRef } from 'react'
 import Navbarv3 from '../../components/Navbarv3'
 import axiosInstance from '../../utils/axiosInstance';
 import { getGreeting } from '../../utils/helper';
+import '../../index.css'
 
 import { FiTrendingUp, FiCalendar, FiUsers, FiActivity, FiBook, FiBarChart2, FiUser, FiAward, FiHeart } from 'react-icons/fi';
 import { Canvas } from '@react-three/fiber';
