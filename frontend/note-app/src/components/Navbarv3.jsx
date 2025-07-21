@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import ProfileInfo from "./Cards/ProfileInfo";
+import ProfileInfo from "./cards/ProfileInfo";
 import { BiHelpCircle } from "react-icons/bi";
 
 const Navbar = ({userInfo}) => {

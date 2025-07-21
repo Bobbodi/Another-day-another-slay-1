@@ -1,9 +1,9 @@
 import React from "react";
+import ProfileInfo from "./cards/ProfileInfo";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar/SearchBar";
 import { MdDelete } from "react-icons/md";
 import { BiHelpCircle } from "react-icons/bi";
-import ProfileInfo from "./Cards/ProfileInfo";
 
 
 const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
