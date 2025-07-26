@@ -1,6 +1,6 @@
 import { BiWater } from "react-icons/bi"
 
-export const BASE_URL = 'http://localhost:8000'
+export const BASE_URL = 'https://adas-backend-y5lz.onrender.com'
 
 export const EMOJIS = { //need to update the mood to use .name 
     '🥰': {name: 'lovey-dovey', score: 2}, //mood score based on how likely it will boost productivity. Closer to 10 = more productive
