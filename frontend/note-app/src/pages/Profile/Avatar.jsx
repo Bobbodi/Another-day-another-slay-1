@@ -22,6 +22,7 @@ import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
 import AvatarCard from '../../components/Cards/AvatarCard.jsx';
 import Toast from "../../components/ToastMessage/Toast";
+import { HumanModel } from '../../components/3D models/HumanModel.jsx';
 
 const Avatar = () => {
 
@@ -129,6 +130,12 @@ const Avatar = () => {
         "scale": [0.33, 0.33, 0.33]},
       10: {
         "model": CreeperModel,
+        "position": [0, 0, 0], 
+        "rotation": [0, 0.5, 0], 
+        "scale": [0.30, 0.30, 0.30]
+      },
+      11: {
+        "model": HumanModel,
         "position": [0, 0, 0], 
         "rotation": [0, 0.5, 0], 
         "scale": [0.30, 0.30, 0.30]

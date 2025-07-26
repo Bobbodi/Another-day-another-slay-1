@@ -109,5 +109,10 @@ export const AVATAR_DESC = {
         name: "I'M NOT CREEPY", 
         hp: 60, 
         speciality: "Secret hobbies? Who's up to try them?"
+    }, 
+    11: { 
+        name: "HALF A HEART", 
+        hp: 60, 
+        speciality: "Two halves make a whole"
     }
 }

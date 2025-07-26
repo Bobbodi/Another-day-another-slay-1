@@ -1,5 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
 
+@theme {
+  --color-yellow: oklch(88.03% 0.135 86.06);
+  --color-dark: oklch(88.03% 0.135 0);
+}
+
+@layer base {
+  html {
+    font-family: "Lexend", sans-serif;
+    font-size: 20 px;
+  }
+}
+
+@import "tailwindcss";
+
+/* @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+
 
 @tailwind base;
 @tailwind components;
@@ -21,17 +37,17 @@
   }
 
   body { 
-    /*background-color: var(--color-darkgreen);*/
+    /*background-color: var(--color-darkgreen);
     overflow-x: hidden;
     margin: 0;
   }
 }
 
-/* @layer components { 
-  /* .input-box { 
+@layer components { 
+  .input-box { 
     @apply w-full bg-transparent border-[1.5px] px-5 py-3 rounded mb-4 outline-none border-customred;
-    /* If you want to use the CSS variable instead, comment out the line above and use the line below: */
-    /* border: 1.5px solid var(--color-red); 
+    If you want to use the CSS variable instead, comment out the line above and use the line below:
+    border: 1.5px solid var(--color-red); 
   }
   .input-box:focus { 
     @apply border-yellow transition-all duration-200;
@@ -41,21 +57,21 @@
   }
   .btn-secondary {
     @apply w-full flex justify-center items-center bg-red text-white p-2 font-medium mt-5 p-3 text-center rounded-xl my-1 hover:bg-green transition-all duration-200 mx-auto;
-  } */
-  /* .icon-btn { 
+  }
+  .icon-btn { 
     @apply text-xl cursor-pointer hover:text-yellow transition-all duration-200;
   }
-  /* .input-label { 
+  .input-label { 
     @apply text-lg text-red font-semibold ;
   } 
-}*/
+}
 
 #root { 
   width: 100vw; 
   height: 100vh; 
   align-items: center;
   justify-content: center;
-}
+}  */
 
 
 
@@ -130,4 +146,4 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-} */
+} */ 

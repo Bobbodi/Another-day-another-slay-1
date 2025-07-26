@@ -37,6 +37,7 @@ import { AVATAR_DESC } from '../../utils/constants.js';
 //react-three-js
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
+import { HumanModel } from '../../components/3D models/HumanModel.jsx';
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState(null); 
@@ -232,6 +233,12 @@ const Profile = () => {
       "rotation": [0, 0.5, 0], 
       "scale": [0.30, 0.30, 0.30]
     },
+    11: {
+      "model": HumanModel,
+      "position": [0, 0, 0], 
+      "rotation": [0, 0.5, 0], 
+      "scale": [0.30, 0.30, 0.30]
+    },
   }
 
   const ROOM_MODELS = { 
@@ -365,7 +372,7 @@ const Profile = () => {
             /> */}
           </Canvas>
 
-          <div className="absolute bottom-8 left-123 w-[200px] h-[200px]">
+          <div className="absolute bottom-3  right-110 w-[200px] h-[200px]">
             {!isLoading && userInfo && (
             <Canvas camera={{ fov: 9, position: [0, 20, 0]}}>
             <ambientLight intensity={0.5} />
@@ -446,7 +453,7 @@ const Profile = () => {
         
         <h2 className="text-2xl mb-5 font-bold"> {getGreeting()} {userInfo?.fullName} </h2>
 
-        <div className="grid grid-cols-1 gap-3 overflow-y-auto max-h-77 overflow-x-hidden" style = {{scrollbarWidth: "none"}}>
+        <div className="grid grid-cols-1 gap-3 overflow-y-auto max-h-[90%] overflow-x-hidden" style = {{scrollbarWidth: "none"}}>
           {/* CARD TEMPLATE */}
           {[
             {

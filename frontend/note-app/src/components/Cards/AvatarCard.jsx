@@ -23,6 +23,7 @@ import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
 
 import { TbSwitch3 } from "react-icons/tb";
+import { HumanModel } from '../3D models/HumanModel.jsx';
 
 const AvatarCard = ({model, onChangeAvatar}) => {
 
@@ -85,6 +86,12 @@ const AvatarCard = ({model, onChangeAvatar}) => {
         "position": [0, 0, 0], 
         "rotation": [0, 0.3, 0], 
         "scale": [0.25, 0.25, 0.25]
+        },
+        11: {
+        "model": HumanModel,
+        "position": [0, 1, 0], 
+        "rotation": [0, 0.3, 0], 
+        "scale": [1.3, 1.3, 1.3]
         },
     }
 

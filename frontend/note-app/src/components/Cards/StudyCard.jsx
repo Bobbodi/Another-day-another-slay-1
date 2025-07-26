@@ -57,7 +57,7 @@ return (
                 onMouseLeave={() => setIsDoneHovered(false)}
             >
                 <LuCircleCheckBig
-                    className={`text-xl cursor-pointer hover:text-yellow transition-all duration-200 hover:text-xl cursor-pointer hover:text-yellow transition-all duration-200 ${
+                    className={`icon-btn hover:icon-btn ${
                         (isDone && !isDoneHovered) || (!isDone && isDoneHovered)
                             ? "text-green"
                             : "text-slate-300"

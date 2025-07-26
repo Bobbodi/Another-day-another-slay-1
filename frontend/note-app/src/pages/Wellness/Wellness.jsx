@@ -75,22 +75,6 @@ const Wellness = () => {
       };
       init();
     }, []); // Keep empty if no external deps
-
-    // Use for enforcing one Sleep log per day 
-    const checkNewDay = () => {
-      const today = new Date();
-      const todayDateString = today.toDateString(); 
-      
-      // Get the last stored date from localStorage or use today's date if not found
-      const lastStoredDateString = localStorage.getItem('lastVisitedDate') || todayDateString;
-    
-      if (todayDateString !== lastStoredDateString) {
-        setNewDay(true);
-        localStorage.setItem('lastVisitedDate', todayDateString);
-      } else {
-        setNewDay(false);
-      }
-    }
     
     const [showToastMsg, setShowToastMsg] = useState({ 
             isShown: false, 
@@ -194,7 +178,6 @@ const Wellness = () => {
       }
     };
 
-
     const handleAddMood = (mood) => { 
       if (!mood) { 
         setError("Please enter a mood");
@@ -254,15 +237,15 @@ const Wellness = () => {
         }
     }
 
-    
 
 return (
-  <div className=" bg-gray-50">
+
+  <div className="min-h-screen bg-yellow-50">
     <Navbarv3 userInfo={userInfo} />
     
-    <div className="mt-2 container mx-auto px-5 py-2">
+    <div className="mt-14  container mx-auto px-5 py-2">
       {/*The three sections: MOOD, SLEEP, JOURNALING */}
-      <div className="flex flex-col lg:flex-row gap-5">
+      <div className="flex flex-col items-center justify-between lg:flex-row gap-5">
 
       {/* MOOD SECTION */}
       <div className="lg:w-1/3 w-full bg-white rounded-xl shadow-lg p-5">
@@ -329,7 +312,7 @@ return (
         <div className="grid grid-cols-7 gap-2 relative z-10 mt-3 ml-3 mr-3"> {/* Added z-10 */}
           {allMoodsLength > 0 ? (
             allMoods
-              .slice(0, 7)
+              .slice(0, 14)
               .map((moodLog) => (
               <div 
                 key={moodLog._id} 
