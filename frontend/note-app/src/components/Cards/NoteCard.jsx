@@ -28,7 +28,7 @@ const NoteCard = ({
 
     return (
         <div
-          className={`w-82 border-l-4 p-3 bg-white hover:shadow-lg rounded-r-lg transition-all duration-200 ease-in-out group flex flex-row relative ${
+          className={`border-l-4 p-3 bg-white hover:shadow-lg rounded-r-lg transition-all duration-200 ease-in-out group flex flex-row relative ${
             priority === 3 ? 'border-red-500' :
             priority === 2 ? 'border-amber-500' :
             priority === 1 ? 'border-emerald-500':  

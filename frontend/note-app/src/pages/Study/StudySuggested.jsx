@@ -110,24 +110,24 @@ const StudySuggested = ({ nodeData, type, getSuggestions, onClose }) => {
     <>
     {/* relative justify-center p-1 rounded-3xl border-2 border-gray-200 */}
     
-    <div className="max-w-99 ml-4 mt-4 mt-2 ">
+    <div className="max-w-full ml-4 mt-4 mt-2 ">
       
       {/*show all notes schedule */}
       {length > 0 
       ? 
       (
-        <div className="flex flex-row w-full overflow-x-auto gap-2"
+        <div className="flex flex-col overflow-y-auto gap-2"
         
             style={{ scrollbarWidth: 'thin'}}>
             {Object.entries(nodeData)
             .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
             .map(([dateString, tasks]) =>  (
-            <div className="max-w-100 bg-white-100 p-5 mb-3 ml-3 rounded-3xl border-2 border-gray-200"> 
+            <div className="bg-white-100 p-5 mb-3 ml-3 rounded-3xl border-2 border-gray-200"> 
                 <p className="text-2xl font-bold text-gray-800 mb-5">
                     {getRelativeDate(dateString)}
                 </p>
 
-                <div key={dateString} className="mb-6 overflow-y-auto h-38"
+                <div key={dateString} className="mb-6 overflow-y-auto"
                 style={{ scrollbarWidth: 'none' }}>
                 
                 <div className="space-y-3">
@@ -213,7 +213,7 @@ const StudySuggested = ({ nodeData, type, getSuggestions, onClose }) => {
 
     {/* Add Button */}
     <button
-        className="absolute w-12 h-12 flex items-center justify-center rounded-full top-52 left-87 bg-yellow-500 
+        className="absolute w-12 h-12 flex items-center justify-center rounded-full top-55 left-85 bg-yellow-500 
         hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl transition-all z-50"
         onClick={() => {
         setOpenAddEditModal({

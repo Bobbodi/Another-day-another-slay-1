@@ -258,7 +258,7 @@ const Study = () => {
       },
       5: { 
         "model": Room5Model, 
-        "position": [-2, -2, 2], 
+        "position": [-2, -3, 2], 
         "rotation": [0, 0, 0], 
         "scale": [0.5, 0.5, 0.5]
       },
@@ -326,23 +326,6 @@ const Study = () => {
         </group>
       )
     }
-
-    const [currentIndex, setCurrentIndex] = useState(0); 
-    const goBack = () => {
-      setCurrentIndex((prev) => {
-        const newIndex = prev === 0 ? canvases.length - 1 : prev - 1;
-        console.log("goBack becomes " + newIndex);
-        return newIndex;
-      });
-    };
-
-    const goForward = () => {
-      setCurrentIndex((prev) => {
-        const newIndex = prev === canvases.length - 1 ? 0 : prev + 1;
-        console.log("goForward becomes " + newIndex);
-        return newIndex;
-      });
-    };
 
     useEffect(() => {
     const fetchData = async () => {
@@ -637,10 +620,10 @@ return (
     <Navbarv3 userInfo={userInfo} />
 
     <div className="container mx-auto px-4 py-4">
-      <div className="flex flex-row gap-4 w-full">
+      <div className="flex flex-row gap-4 w-full items-start justify-between">
         {/* Left Column - Tasks (25%) */}
         <div className="flex flex-col">
-          <div className="space-x-4 flex flex-row">
+          <div className="space-x-6 flex flex-row">
             <div className="ml-8 p-4 bg-amber-50 rounded-xl shadow-sm border border-amber-100">
               <h3 className="text-sm font-medium text-amber-600 mb-1">All time</h3>
               <p className="text-2xl font-semibold text-amber-700">
@@ -668,7 +651,7 @@ return (
         </div> 
 
         {/* Right Column - Canvas */}
-        <div className="relative flex-1 h-[calc(100vh-130px)] overflow-hidden">
+        <div className="relative flex-1 items-top h-[calc(100vh-130px)] overflow-hidden">
           {/* Full-screen Canvas */}
           <div className="absolute inset-0 z-0">
             <Canvas camera={{ fov: 9, position: [30, 80, 30] }}>
@@ -696,10 +679,10 @@ return (
             </Canvas>
           </div>
 
-          <div className="absolute top-0 right-0 z-10">
-            <div className="p-3 bg-white/60 backdrop-blur-sm rounded-xl shadow-lg flex flex-col">
+          <div className="absolute top-0 left-0 z-10">
+            <div className="p-4 bg-white/60 backdrop-blur-sm rounded-xl shadow-lg flex flex-col">
               <div className="flex flex-row items-center justify-between gap-4">
-                <span className="text-3xl font-mono font-bold text-gray-800">
+                <span className="text-4xl font-mono font-bold text-gray-800">
                   {formatTime(elapsedTime)}
                 </span>
 

@@ -110,7 +110,7 @@ const Signup = () => {
         <>
         <Navbarv2 />
 
-        <div className="flex flex-col md:flex-row h-[calc(100vh-83px)] bg-yellow-50">
+        <div className="flex flex-col md:flex-row h-screen bg-yellow-50">
               {/* Left Side - About Section (50% width) */}
         
               <div className="w-5/8 flex items-center justify-center">

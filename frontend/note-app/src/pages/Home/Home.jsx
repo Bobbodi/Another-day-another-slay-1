@@ -8,7 +8,6 @@ import axiosInstance from "../../utils/axiosInstance";
 
 import Toast from "../../components/ToastMessage/Toast";
 import Modal from "react-modal";
-import Loading from "../../components/Loading/Loading";
 
 import { MdAdd } from "react-icons/md";
 import { RiExpandDiagonalLine } from "react-icons/ri";
@@ -44,7 +43,6 @@ const Home = () => {
     const [userInfo, setUserInfo] = useState(null); 
     const [error, setError] = useState(null);
     const [suggestedNotes, setSuggestedNotes] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [avgStartSleep, setAvgStartSleep] = useState(23);
     const [avgEndSleep, setAvgEndSleep] = useState(9);
     const [productivity, setProductivity] = useState(8);
@@ -68,6 +66,7 @@ const Home = () => {
             isShown: false, 
             message: "",
         })
+        getAllNotes(); 
     };
 
     const showToastMessage = (message, type) => { 
@@ -76,6 +75,7 @@ const Home = () => {
             message,
             type
         })
+        setOpenAddEditModal({ isShown: false, data: null, type: "add"});
     };
 
 
@@ -102,12 +102,11 @@ const Home = () => {
                 setAllNotes(response.data.notes);
                 setAllDoneNotes(response.data.notes.filter((note) => note.isDone))
             }
+            callGetSuggestions();
         } catch (error) { 
             console.log("beep boop error time")
         }
     }
-
-
 
     //delete Notes
     const deleteNote = async (data) => {
@@ -173,7 +172,6 @@ const Home = () => {
             }
         }
     }
-
 
     const handleClearSearch = () => { 
         setIsSearch(false);
@@ -247,25 +245,27 @@ const Home = () => {
     <>
         <Navbar userInfo={userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch} />
 
-        <div className="bg-gray-50">
-            <div className="container mt-4 gap-4 px-0 py-0 flex flex-col lg:flex-row justify-center">
+        <div className="p-10 w-full h-full bg-gray-50">
+            <div className="container gap-4 px-0 py-0 flex flex-col lg:flex-row justify-center">
 
                 {/* Main Content Area */}
 
-                <div className="flex justify-center items-center w-full lg:w-[40%] rounded-xl shadow-lg p-6">
+                <div className="flex w-full h-[50%] lg:w-[40%] rounded-xl shadow-lg p-6">
                     {/* Today's suggested tasks section */}
                     {/*<h1 className="text-2xl font-bold text-gray-800 mb-6">Calender</h1>*/}
                     {/* Show loading page while fetching data */}
+                    
                     <Calendar 
                         selectedDate={selectedDate} 
                         setSelectedDate={setSelectedDate}
                         highlightDates={Object.keys(suggestedNotes)}
                         />
+                    
                 </div> 
                 
 
                 
-            <div className="max-h-100 w-full lg:w-[40%] rounded-xl shadow-lg p-6">
+            <div className="w-full lg:w-[40%] rounded-xl shadow-lg p-6">
             {/* Tasks Section Header */}
             <div className="flex flex-row justify-between items-center mb-3">
                 {
@@ -296,7 +296,7 @@ const Home = () => {
             </div>
 
             {/* Combined notes container with proper scrolling */}
-            <div className="mt-3 space-y-3 overflow-y-auto max-h-[calc(100vh-300px)]" style={{ scrollbarWidth: 'thin' }}>
+            <div className="mt-3 space-y-3 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
                 {/* Completed notes for selected day */}
                 {isSearch && (
                 searchNotes.length > 0 ? (
@@ -390,10 +390,7 @@ const Home = () => {
 
             </div>
             </div> 
-        
-                    
-                    
-            
+     
         {/* Add Button */}
         <button
             className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow-500 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl transition-all z-50"
