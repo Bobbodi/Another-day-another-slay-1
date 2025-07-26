@@ -1,5 +1,5 @@
 import React from "react";
-import ProfileInfo from "./cards/ProfileInfo";
+import ProfileInfo from "./Cards/ProfileInfo";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar/SearchBar";
 import { MdDelete } from "react-icons/md";
