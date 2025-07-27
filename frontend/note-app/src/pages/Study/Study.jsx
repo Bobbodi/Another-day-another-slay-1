@@ -174,7 +174,7 @@ const Study = () => {
         "textrot": [0, Math.PI, 0]
       },
       8: {
-        "model": "rainbowDragon/scene.gltf", 
+        "model": "rainbow_dragon/scene.gltf", 
         "position": {
           0: [-1, 3.7, -0.5], 
           1: [0, 3.9, 0],     
